@@ -1,0 +1,474 @@
+﻿@model LCM.Domain.Entities.Campaign
+@{
+    ViewData["Title"] = "Kampanya Detay";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-11">
+
+        <!-- Mavi Bar -->
+        <div class="mb-3" style="background:linear-gradient(135deg,#1d4ed8,#2563eb); border-radius:14px; padding:1.25rem 1.5rem; color:white;">
+
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                <div style="font-size:0.75rem; opacity:0.65; letter-spacing:0.06em; text-transform:uppercase; font-weight:500;">
+                    Kampanya Detayları
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/Campaign/Print/@Model.Id" target="_blank"
+                           style="font-size:0.8rem; padding:4px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); color:white; text-decoration:none;">
+                        <i class="bi bi-printer me-1"></i>Yazdır
+                    </a>
+                    @if (User.IsInRole("Admin") || User.IsInRole("VeriGirisi"))
+                    {
+                        <a href="/Campaign/Edit/@Model.Id"
+                               style="font-size:0.8rem; padding:4px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); color:white; text-decoration:none;">
+                            <i class="bi bi-pencil me-1"></i>Düzenle
+                        </a>
+                    }
+                    @if ((User.IsInRole("KampanyaYonetici") || User.IsInRole("Admin")) && Model.Durum == "Onay Bekliyor")
+                    {
+                        <button style="font-size:0.8rem; padding:4px 12px; border-radius:8px; border:none; background:#16a34a; color:white; cursor:pointer;"
+                                onclick="onaylaModal(@Model.Id, '@Html.Raw(Model.Baslik?.Replace("'", "\\'") ?? "")')">
+                            <i class="bi bi-check-lg me-1"></i>Onayla
+                        </button>
+                        <button style="font-size:0.8rem; padding:4px 12px; border-radius:8px; border:none; background:#dc2626; color:white; cursor:pointer;"
+                                onclick="yorumModal(@Model.Id, 'reddet', '@Html.Raw(Model.Baslik?.Replace("'", "\\'") ?? "")')">
+                            <i class="bi bi-x-lg me-1"></i>Reddet
+                        </button>
+                        <button style="font-size:0.8rem; padding:4px 12px; border-radius:8px; border:none; background:#ca8a04; color:white; cursor:pointer;"
+                                onclick="yorumModal(@Model.Id, 'revize', '@Html.Raw(Model.Baslik?.Replace("'", "\\'") ?? "")')">
+                            <i class="bi bi-pencil me-1"></i>Revize İste
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Bar Grid: SKU, Barkod, Tarih, Oluşturma, Ekleyen, Durum -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:12px;">
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">SKU</div>
+                    <div style="font-size:0.88rem; font-weight:500;">@Model.Sku</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">BARKOD</div>
+                    <div style="font-size:0.82rem; font-weight:500; font-family:monospace;">@Model.Barkod</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">TARİH ARALIĞI</div>
+                    <div style="font-size:0.82rem; font-weight:500;">@Model.BaslangicTarihi.ToString("dd.MM.yyyy") – @Model.BitisTarihi.ToString("dd.MM.yyyy")</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">OLUŞTURMA TARİHİ</div>
+                    <div style="font-size:0.82rem; font-weight:500;">@Model.OlusturmaTarihi.ToString("dd.MM.yyyy") · @Model.OlusturmaTarihi.ToString("HH:mm")</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">EKLEYEN</div>
+                    <div style="font-size:0.82rem; font-weight:500;">@Model.EkleyenKullanici?.Ad @Model.EkleyenKullanici?.Soyad</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px;">
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:3px;">DURUM</div>
+                    <div style="margin-top:2px;">
+                        @if (Model.Durum == "Aktif")
+                        {
+                            <span style="background:#16a34a; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Aktif</span>
+                        }
+                        else if (Model.Durum == "Pasif")
+                        {
+                            <span style="background:#dc2626; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Pasif</span>
+                        }
+                        else if (Model.Durum == "Planlanmış")
+                        {
+                            <span style="background:rgba(255,255,255,0.25); color:white; border:1px solid rgba(255,255,255,0.5); border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Planlanmış</span>
+                        }
+                        else if (Model.Durum == "Onay Bekliyor")
+                        {
+                            <span style="background:#ca8a04; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Onay Bekliyor</span>
+                        }
+                        else if (Model.Durum == "Onaylandı")
+                        {
+                            <span style="background:#16a34a; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Onaylandı</span>
+                        }
+                        else if (Model.Durum == "Reddedildi")
+                        {
+                            <span style="background:#dc2626; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Reddedildi</span>
+                        }
+                        else if (Model.Durum == "Revize İstendi")
+                        {
+                            <span style="background:#d97706; color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Revize İstendi</span>
+                        }
+                        else
+                        {
+                            <span style="background:rgba(255,255,255,0.2); color:white; border-radius:20px; font-size:0.75rem; padding:2px 10px; font-weight:500;">● Taslak</span>
+                        }
+                    </div>
+
+                    @* Son onay aksiyonu — log'dan JS ile yüklenir, yol haritasıyla tutarlı *@
+                    <div id="detailSonAksiyon" style="margin-top:6px; font-size:0.72rem; opacity:0.85;"></div>
+                </div>
+            </div>
+
+            <!-- Şubeler -->
+            @if (Model.CampaignStores != null && Model.CampaignStores.Any())
+            {
+                <div>
+                    <div style="font-size:0.68rem; opacity:0.65; letter-spacing:0.06em; margin-bottom:6px;">ŞUBELER</div>
+                    <div class="d-flex flex-wrap gap-1">
+                        @foreach (var cs in Model.CampaignStores)
+                        {
+                            <span style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:20px; font-size:0.75rem; padding:2px 10px; color:white;">
+                                @cs.Store.StoreCode - @cs.Store.StoreName
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Alt Alan: Önizleme + Yol Haritası -->
+        <div style="display:grid; grid-template-columns:500px 1fr; gap:1rem;">
+
+            <!-- SOL: Önizleme -->
+            <div style="background:#f8fafc; border-radius:14px; padding:16px; display:flex; flex-direction:column;">
+                <div style="font-size:0.72rem; color:#888; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">
+                    <i class="bi bi-eye me-1 text-primary"></i>Önizleme
+                </div>
+                <div id="onizlemeAlani" style="flex:1; display:flex; align-items:center; justify-content:center; min-height:260px;">
+                    <div class="text-center text-muted py-5">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- SAĞ: Yol Haritası -->
+            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4" style="font-size:0.88rem;">
+                        <i class="bi bi-signpost-split me-2 text-primary"></i>Kampanya Yol Haritası
+                    </h6>
+                    <div id="yolHaritasiAlani">
+                        <div class="text-center text-muted py-3">
+                            <div class="spinner-border spinner-border-sm me-2"></div>
+                            Yükleniyor...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="/Campaign/Index" class="btn btn-light btn-sm" style="border-radius:8px;">
+                <i class="bi bi-arrow-left me-1"></i>Listeye Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Onayla Modal -->
+<div class="modal fade" id="onayModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; border:0;">
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-check-circle display-4 text-success d-block mb-3"></i>
+                <h5 class="fw-bold mb-2">Kampanyayı Onayla</h5>
+                <p class="text-muted mb-4" id="onayModalBaslik" style="font-size:0.9rem;"></p>
+                <form id="onayForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="submit" class="btn btn-success px-4" style="border-radius:10px;">
+                            <i class="bi bi-check-lg me-1"></i>Evet, Onayla
+                        </button>
+                        <button type="button" class="btn btn-light px-4" style="border-radius:10px;" data-bs-dismiss="modal">
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reddet / Revize Modal -->
+<div class="modal fade" id="yorumModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; border:0;">
+            <div class="modal-body p-4">
+                <h5 class="fw-bold mb-1" id="yorumModalBaslik"></h5>
+                <p class="text-muted mb-3" id="yorumModalAlt" style="font-size:0.88rem;"></p>
+                <form id="yorumForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.88rem;">
+                            Yorum <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="yorumInput" name="yorum" class="form-control" rows="3"
+                                  style="border-radius:10px;" placeholder="Açıklama yazın..."></textarea>
+                        <div id="yorumHata" style="display:none; color:#dc2626; font-size:0.82rem; margin-top:4px;">
+                            <i class="bi bi-exclamation-circle me-1"></i>Yorum alanı zorunludur.
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" id="yorumSubmitBtn" class="btn px-4" style="border-radius:10px;">Gönder</button>
+                        <button type="button" class="btn btn-light px-4" style="border-radius:10px;" data-bs-dismiss="modal">İptal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var mevcutDegerler = {
+            Baslik: '@Html.Raw(Model.Baslik?.Replace("'", "\\'") ?? "")',
+            AltBaslik: '@Html.Raw(Model.AltBaslik?.Replace("'", "\\'") ?? "")',
+            KampanyaNotu: '@Html.Raw(Model.KampanyaNotu?.Replace("'", "\\'") ?? "")',
+            Subheadline: '@Html.Raw(Model.Subheadline?.Replace("'", "\\'") ?? "")',
+            OriginalPrice: '@(Model.OriginalPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")',
+            DiscountedPrice: '@(Model.DiscountedPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")',
+            BuyQuantityText: '@Html.Raw(Model.BuyQuantityText?.Replace("'", "\\'") ?? "")',
+            PayQuantityText: '@Html.Raw(Model.PayQuantityText?.Replace("'", "\\'") ?? "")',
+            Headline: '@Html.Raw(Model.Headline?.Replace("'", "\\'") ?? "")',
+            MinBasketText: '@Html.Raw(Model.MinBasketText?.Replace("'", "\\'") ?? "")',
+            DetailText: '@Html.Raw(Model.DetailText?.Replace("'", "\\'") ?? "")',
+            CampaignDescription: '@Html.Raw(Model.CampaignDescription?.Replace("'", "\\'") ?? "")',
+            IsLocalProduction: '@Model.IsLocalProduction',
+            OriginCountry: '@Html.Raw(Model.OriginCountry?.Replace("'", "\\'") ?? "")',
+            UnitPrice: '@Html.Raw(Model.UnitPrice?.Replace("'", "\\'") ?? "")',
+            PriceUpdateDate: '@Html.Raw(Model.PriceUpdateDate?.Replace("'", "\\'") ?? "")',
+            DateRange: '@Html.Raw(Model.DateRange?.Replace("'", "\\'") ?? "")'
+        };
+
+        window.addEventListener('load', function () {
+            var sablonId = '@Model.SablonId';
+            if (!sablonId) return;
+
+            fetch('/Campaign/GetTemplateFields?templateId=' + sablonId)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.layoutJson) {
+                        document.getElementById('onizlemeAlani').innerHTML =
+                            '<div class="text-center text-muted py-5">Layout tasarımı tanımlanmamış.</div>';
+                        return;
+                    }
+                    var layoutJson = JSON.parse(data.layoutJson);
+                    onizlemeBuildFromJson(layoutJson);
+                    onizlemeDoldur();
+                });
+        });
+
+        function onizlemeBuildFromJson(layoutJson) {
+            window._aktifLayoutJson = layoutJson;
+            var w  = layoutJson.genislik  || 300;
+            var h  = layoutJson.yukseklik || 400;
+            var bg = layoutJson.arkaplan  || '#fff';
+
+            var inner = `<div style="width:${w}px; height:${h}px; background:${bg};
+                border:2px solid #e0e0e0; border-radius:8px; position:relative;
+                font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+                margin:0 auto; overflow:hidden;">`;
+
+            (layoutJson.alanlar || []).forEach(function(alan) {
+                var justify = alan.textAlign==='center'?'center':(alan.textAlign==='right'?'flex-end':'flex-start');
+
+                if (alan.ad === 'IsLocalProduction') {
+                    inner += `<div id="prev_${alan.ad}"
+                        style="position:absolute; left:${alan.x}px; top:${alan.y}px;
+                        width:${alan.width}px; height:${alan.height}px;
+                        display:none; align-items:center; justify-content:${justify};
+                        overflow:hidden; box-sizing:border-box;">
+                        <img src="/img/yerliuretimkirmizi.svg" style="width:100%; height:100%; object-fit:contain;" />
+                    </div>`;
+                } else {
+                    var efektSvg = '';
+                    var ef = alan.efektler || {};
+                    if (Object.values(ef).some(function(v){ return v===true; })) {
+                        var renk = ef.renk || '#e63946';
+                        var ek = ef.kalinlik || 2;
+                        var pw = alan.width, ph = alan.height;
+                        var cw = (ef.uzunluk && ef.uzunluk > 0) ? ef.uzunluk : pw;
+                        var ch = (ef.yukseklik && ef.yukseklik > 0) ? ef.yukseklik : ph;
+                        var ox = (pw - cw) / 2;
+                        var oy = (ph - ch) / 2;
+                        var lines = '';
+                        if (ef.ust)      lines += '<line x1="0" y1="1" x2="' + pw + '" y2="1" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        if (ef.alt)      lines += '<line x1="0" y1="' + (ph-1) + '" x2="' + pw + '" y2="' + (ph-1) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        if (ef.sol)      lines += '<line x1="1" y1="0" x2="1" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        if (ef.sag)      lines += '<line x1="' + (pw-1) + '" y1="0" x2="' + (pw-1) + '" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        if (ef.carpraz1) lines += '<line x1="' + ox + '" y1="' + oy + '" x2="' + (ox+cw) + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        if (ef.carpraz2) lines += '<line x1="' + (ox+cw) + '" y1="' + oy + '" x2="' + ox + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+                        efektSvg = '<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="' + pw + '" height="' + ph + '">' + lines + '</svg>';
+                    }
+
+                    var fontFamilyStyle = alan.fontAilesi ? alan.fontAilesi : 'inherit';
+                    inner += `<div id="prev_${alan.ad}"
+                        style="position:absolute; left:${alan.x}px; top:${alan.y}px;
+                        width:${alan.width}px; height:${alan.height}px;
+                        font-size:${alan.fontSize}px; font-weight:${alan.fontWeight};
+                        color:${alan.color}; text-align:${alan.textAlign};
+                        font-family:${fontFamilyStyle};
+                        display:none; align-items:center; justify-content:${justify};
+                        overflow:hidden; box-sizing:border-box;">
+                        ${efektSvg}
+                        <span class="prev-metin" style="position:relative; z-index:1;"></span>
+                    </div>`;
+                }
+            });
+
+            (layoutJson.cizgiler || []).forEach(function(c) {
+                var svgIc = '';
+                if (c.yon==='yatay')         svgIc = `<line x1="0" y1="${c.height/2}" x2="${c.width}" y2="${c.height/2}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='dikey')    svgIc = `<line x1="${c.width/2}" y1="0" x2="${c.width/2}" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='carpraz1') svgIc = `<line x1="0" y1="0" x2="${c.width}" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='carpraz2') svgIc = `<line x1="${c.width}" y1="0" x2="0" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+
+                inner += `<div style="position:absolute; left:${c.x}px; top:${c.y}px;
+                    width:${c.width}px; height:${c.height}px; pointer-events:none;">
+                    <svg width="${c.width}" height="${c.height}">${svgIc}</svg>
+                </div>`;
+            });
+
+            inner += '</div>';
+            document.getElementById('onizlemeAlani').innerHTML = inner;
+        }
+
+        function onizlemeDoldur() {
+            var alanlar = ['Baslik','AltBaslik','KampanyaNotu','Subheadline',
+                           'OriginalPrice','DiscountedPrice','BuyQuantityText','PayQuantityText',
+                           'Headline','MinBasketText','DetailText','CampaignDescription',
+                           'OriginCountry','UnitPrice','PriceUpdateDate','DateRange'];
+
+            alanlar.forEach(function(alan) {
+                var prev = document.getElementById('prev_' + alan);
+                if (!prev) return;
+                var deger = mevcutDegerler[alan] || '';
+                if (!deger) return;
+                var metin = prev.querySelector('.prev-metin') || prev;
+                if (alan === 'OriginalPrice' || alan === 'DiscountedPrice') {
+                    metin.textContent = '₺' + deger;
+                } else {
+                    metin.textContent = deger;
+                }
+                prev.style.display = 'flex';
+            });
+
+            var localPrev = document.getElementById('prev_IsLocalProduction');
+            if (localPrev && mevcutDegerler.IsLocalProduction === 'True') {
+                localPrev.style.display = 'flex';
+            }
+        }
+
+        var kampanyaId = @Model.Id;
+
+        var aksiyonRenk = {
+            'Oluşturuldu':               { bg: '#eff6ff', border: '#2563eb', ikon: 'bi-plus-circle-fill',    renk: '#2563eb' },
+            'Onaya Gönderildi':          { bg: '#fefce8', border: '#ca8a04', ikon: 'bi-send-fill',           renk: '#ca8a04' },
+            'Onaylandı':                 { bg: '#f0fdf4', border: '#16a34a', ikon: 'bi-check-circle-fill',   renk: '#16a34a' },
+            'Reddedildi':                { bg: '#fef2f2', border: '#dc2626', ikon: 'bi-x-circle-fill',       renk: '#dc2626' },
+            'Revize İstendi':            { bg: '#fffbeb', border: '#d97706', ikon: 'bi-pencil-fill',         renk: '#d97706' },
+            'Statü Belirlendi':          { bg: '#f0f4ff', border: '#6366f1', ikon: 'bi-flag-fill',           renk: '#6366f1' },
+            'Statü Otomatik Belirlendi': { bg: '#f0f4ff', border: '#6366f1', ikon: 'bi-robot',               renk: '#6366f1' },
+            'Düzenlendi':                { bg: '#f8fafc', border: '#64748b', ikon: 'bi-pencil-square',       renk: '#64748b' },
+            'Mail Gönderildi':           { bg: '#f0fdf4', border: '#16a34a', ikon: 'bi-envelope-check-fill', renk: '#16a34a' },
+            'Mail Gönderilemedi':        { bg: '#fef2f2', border: '#dc2626', ikon: 'bi-envelope-x-fill',     renk: '#dc2626' },
+            'default':                   { bg: '#f8fafc', border: '#94a3b8', ikon: 'bi-circle-fill',         renk: '#94a3b8' }
+        };
+
+        fetch('/Campaign/Loglar/' + kampanyaId)
+            .then(function(r) { return r.json(); })
+            .then(function(loglar) {
+                var alan = document.getElementById('yolHaritasiAlani');
+                if (!loglar || loglar.length === 0) {
+                    alan.innerHTML = '<p class="text-muted text-center py-3">Henüz log kaydı yok.</p>';
+                    return;
+                }
+                var html = '<div style="position:relative; padding-left:32px;">';
+                html += '<div style="position:absolute; left:11px; top:8px; bottom:8px; width:2px; background:#e2e8f0;"></div>';
+                loglar.forEach(function(log, i) {
+                    var stil = aksiyonRenk[log.aksiyon] || aksiyonRenk['default'];
+                    html += '<div style="position:relative; margin-bottom:' + (i < loglar.length - 1 ? '24px' : '0') + ';">';
+                    html += '<div style="position:absolute; left:-32px; top:4px; width:22px; height:22px;'
+                          + 'background:' + stil.bg + '; border:2px solid ' + stil.border + ';'
+                          + 'border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:1;">'
+                          + '<i class="bi ' + stil.ikon + '" style="font-size:0.6rem; color:' + stil.renk + ';"></i>'
+                          + '</div>';
+                    html += '<div style="background:' + stil.bg + '; border:1px solid ' + stil.border + '33; border-radius:10px; padding:12px 14px;">';
+                    html += '<div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">';
+                    html += '<span style="font-weight:600; font-size:0.88rem; color:' + stil.renk + ';">'
+                          + '<i class="bi ' + stil.ikon + ' me-1"></i>' + log.aksiyon + '</span>';
+                    html += '<span style="font-size:0.75rem; color:#94a3b8;"><i class="bi bi-clock me-1"></i>' + log.tarih + '</span>';
+                    html += '</div>';
+                    html += '<div style="font-size:0.78rem; color:#64748b; margin-bottom:' + (log.yorum || log.hedefEmail ? '6px' : '0') + ';">'
+                          + '<i class="bi bi-person me-1"></i>' + log.kullanici + '</div>';
+                    if (log.yorum) {
+                        html += '<div style="font-size:0.82rem; color:#374151; background:rgba(255,255,255,0.7); border-radius:6px; padding:6px 10px; margin-top:4px;">'
+                              + '<i class="bi bi-chat-left-text me-1 text-muted"></i>' + log.yorum + '</div>';
+                    }
+                    if (log.hedefEmail) {
+                        html += '<div style="font-size:0.75rem; color:#64748b; margin-top:4px;">'
+                              + '<i class="bi bi-envelope me-1"></i>' + log.hedefEmail + '</div>';
+                    }
+                    html += '</div></div>';
+                });
+                html += '</div>';
+                alan.innerHTML = html;
+                        // Son onay aksiyonunu mavi bar'daki DURUM altına yaz
+        const onayAksiyonlari = ['Onaylandı', 'Reddedildi', 'Revize İstendi', 'Onaya Gönderildi'];
+        const sonOnayLog = [...loglar].reverse().find(l => onayAksiyonlari.includes(l.aksiyon));
+        if (sonOnayLog) {
+            const renkMap = {
+                'Onaylandı':       '#16a34a',
+                'Reddedildi':      '#dc2626',
+                'Revize İstendi':  '#d97706',
+                'Onaya Gönderildi':'#2563eb'
+            };
+            const renk = renkMap[sonOnayLog.aksiyon] || 'rgba(255,255,255,0.7)';
+            document.getElementById('detailSonAksiyon').innerHTML =
+                `<span style="background:${renk}33; border:1px solid ${renk}66;
+                              border-radius:12px; padding:2px 8px; color:white; font-size:0.7rem;">
+                    ↳ ${sonOnayLog.aksiyon}
+                    ${sonOnayLog.yorum ? `<span style="opacity:0.8;"> — ${sonOnayLog.yorum}</span>` : ''}
+                </span>`;
+        }
+            })
+            .catch(function() {
+                document.getElementById('yolHaritasiAlani').innerHTML =
+                    '<p class="text-danger text-center py-3">Log verileri yüklenemedi.</p>';
+            });
+
+        function onaylaModal(id, baslik) {
+            document.getElementById('onayModalBaslik').textContent =
+                '"' + baslik + '" kampanyasını onaylamak istediğinize emin misiniz?';
+            document.getElementById('onayForm').action = '/Campaign/Onayla/' + id;
+            new bootstrap.Modal(document.getElementById('onayModal')).show();
+        }
+
+        function yorumModal(id, tip, baslik) {
+            var form     = document.getElementById('yorumForm');
+            var baslikEl = document.getElementById('yorumModalBaslik');
+            var altEl    = document.getElementById('yorumModalAlt');
+            var btn      = document.getElementById('yorumSubmitBtn');
+            document.getElementById('yorumInput').value = '';
+            document.getElementById('yorumHata').style.display = 'none';
+            if (tip === 'reddet') {
+                baslikEl.textContent = 'Kampanyayı Reddet';
+                altEl.textContent    = '"' + baslik + '" kampanyası reddedilecek.';
+                btn.className        = 'btn btn-danger px-4';
+                btn.textContent      = 'Reddet';
+                form.action          = '/Campaign/Reddet/' + id;
+            } else {
+                baslikEl.textContent = 'Revize İste';
+                altEl.textContent    = '"' + baslik + '" için revize talep edilecek.';
+                btn.className        = 'btn btn-warning px-4';
+                btn.textContent      = 'Revize İste';
+                form.action          = '/Campaign/RevizeIste/' + id;
+            }
+            form.onsubmit = function(e) {
+                var yorum = document.getElementById('yorumInput').value.trim();
+                if (!yorum) {
+                    e.preventDefault();
+                    document.getElementById('yorumHata').style.display = 'block';
+                    return false;
+                }
+            };
+            new bootstrap.Modal(document.getElementById('yorumModal')).show();
+        }
+    </script>
+}

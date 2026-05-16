@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Yeni Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm" style="border-radius:14px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-1">Yeni Layout</h5>
+                <p class="text-muted mb-4" style="font-size:0.88rem;">
+                    Önce isim ve kod gir, sonra tasarım ekranına geçeceksin
+                </p>
+
+                @if (TempData["Hata"] != null)
+                {
+                    <div class="alert alert-danger" style="font-size:0.88rem;">@TempData["Hata"]</div>
+                }
+
+                <form method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Layout Adı</label>
+                        <input type="text" name="ad" class="form-control"
+                               placeholder="örn: Tutar Kampanyası"
+                               style="border-radius:10px;" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Layout Kodu</label>
+                        <input type="text" name="layoutKodu" class="form-control"
+                               placeholder="örn: layout_tutar"
+                               style="border-radius:10px;" />
+                        <div class="text-muted mt-1" style="font-size:0.78rem;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Küçük harf, alt çizgi kullan. Sonradan değiştirme.
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;">
+                            <i class="bi bi-arrow-right me-1"></i>Tasarıma Geç
+                        </button>
+                        <a href="/Layout/Index" class="btn btn-light px-4" style="border-radius:10px;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

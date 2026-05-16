@@ -1,0 +1,251 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = LCM.Web
+build_property.RootNamespace = LCM.Web
+build_property.ProjectDir = C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Web\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Web
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/BenimKampanyalarim.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cQmVuaW1LYW1wYW55YWxhcmltLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cRGV0YWlsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/OnayBekleyenler.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cT25heUJla2xleWVubGVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/Print.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cUHJpbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Campaign/PrintList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FtcGFpZ25cUHJpbnRMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/DigitalLabelSpec/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlnaXRhbExhYmVsU3BlY1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/DigitalLabelSpec/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlnaXRhbExhYmVsU3BlY1xEZXRhaWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/DigitalLabelSpec/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlnaXRhbExhYmVsU3BlY1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/DigitalLabelSpec/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlnaXRhbExhYmVsU3BlY1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslApi/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsQXBpXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslEslestirme/AdminLog.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRXNsZXN0aXJtZVxBZG1pbkxvZy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslEslestirme/HizliEslestirme.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRXNsZXN0aXJtZVxIaXpsaUVzbGVzdGlybWUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslEslestirme/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRXNsZXN0aXJtZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslEslestirme/Loglarim.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRXNsZXN0aXJtZVxMb2dsYXJpbS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslEslestirme/NormalEslestirme.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRXNsZXN0aXJtZVxOb3JtYWxFc2xlc3Rpcm1lLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslField/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRmllbGRcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslField/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRmllbGRcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslField/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsRmllbGRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslGonderim/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsR29uZGVyaW1cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslJob/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsSm9iXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslJob/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsSm9iXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslJob/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsSm9iXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslTask/Form.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsVGFza1xGb3JtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/EslTask/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXNsVGFza1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/FieldMapping/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmllbGRNYXBwaW5nXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/FieldMapping/Manage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmllbGRNYXBwaW5nXE1hbmFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Font/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRm9udFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Home/BaglantiHatasi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYWdsYW50aUhhdGFzaS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/LabelType/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGFiZWxUeXBlXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/LabelType/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGFiZWxUeXBlXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/LabelType/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGFiZWxUeXBlXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Layout/Builder.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGF5b3V0XEJ1aWxkZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Layout/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGF5b3V0XENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Layout/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGF5b3V0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Shared/404.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXDQwNC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Shared/YetkiYok.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFlldGtpWW9rLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Store/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Store/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Store/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/SystemSetting/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3lzdGVtU2V0dGluZ1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Template/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVtcGxhdGVcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Template/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVtcGxhdGVcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Template/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVtcGxhdGVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/User/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/User/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/User/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/muhammed.kostak/source/repos/LabelCampaignManager/LCM.Web/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-h21jieip1q

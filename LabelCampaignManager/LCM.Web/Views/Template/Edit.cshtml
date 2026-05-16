@@ -1,0 +1,446 @@
+﻿@model LCM.Web.ViewModels.TemplateEditViewModel
+@{
+    ViewData["Title"] = "Şablon Düzenle";
+}
+
+<div class="row g-4">
+    <!-- SOL: Form -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm" style="border-radius:14px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-1">Şablon Düzenle</h5>
+                <p class="text-muted mb-4" style="font-size:0.88rem;">Şablonu güncelle</p>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="MevcutFotoYolu" type="hidden" />
+                    <div asp-validation-summary="All" class="alert alert-danger" style="font-size:0.88rem;"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Şablon Adı</label>
+                        <input asp-for="SablonAdi" class="form-control" style="border-radius:10px;" />
+                        <span asp-validation-for="SablonAdi" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Açıklama</label>
+                        <textarea asp-for="Aciklama" class="form-control" rows="2" style="border-radius:10px;"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Etiket Tipi</label>
+                        <select asp-for="EtiketTipId" asp-items="ViewBag.EtiketTipleri"
+                                class="form-select" style="border-radius:10px;">
+                        </select>
+                        <span asp-validation-for="EtiketTipId" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Layout Tasarımı</label>
+                        <select asp-for="LayoutKodu" class="form-select" style="border-radius:10px;"
+                                id="layoutSelect" onchange="layoutSecildi(this.value)">
+                            <option value="">— Seçin —</option>
+                            @foreach (var layout in (IEnumerable<dynamic>)ViewBag.Layoutlar)
+                            {
+                                <option value="@layout.LayoutKodu">@layout.Ad</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">
+                            Şablon Fotoğrafı <span class="text-muted">(boş bırakırsan değişmez)</span>
+                        </label>
+                        @if (!string.IsNullOrEmpty(Model.MevcutFotoYolu))
+                        {
+                            <div class="mb-2">
+                                <img src="@Model.MevcutFotoYolu" alt="Mevcut"
+                                     style="max-height:120px; border-radius:10px; border:1px solid #e0e0e0;" />
+                            </div>
+                        }
+                        <input asp-for="SablonFoto" type="file" class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp" style="border-radius:10px;"
+                               onchange="onFotoSecildi(this)" />
+                        <div id="fotoOnizleme" class="mt-2" style="display:none;">
+                            <img id="fotoImg" src="" alt="Yeni Önizleme"
+                                 style="max-height:120px; border-radius:10px; border:1px solid #e0e0e0;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Aktif Alanlar</label>
+                        <div class="card border-0" style="background:#f8fafc; border-radius:10px; padding:1rem;">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanBaslik" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Başlık</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanAltBaslik" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Alt Başlık</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanKampanyaNotu" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Kampanya Notu</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanSubheadline" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Ürün Alt Satır</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanOriginalPrice" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Eski Fiyat</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanDiscountedPrice" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Yeni Fiyat</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanBuyQuantityText" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Alım Adedi Metni</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanPayQuantityText" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Ödeme Adedi Metni</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanHeadline" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Ürün Ana Satır</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanMinBasketText" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Sepet Koşulu</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanDetailText" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Ürün Detay Satırı</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanCampaignDescription" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Kampanya Açıklaması</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanIsLocalProduction" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Yerli Üretim</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanOriginCountry" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Üretim Yeri</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanUnitPrice" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Birim Fiyatı</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanPriceUpdateDate" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Fiyat Değişiklik Tarihi</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="AlanDateRange" class="form-check-input" onchange="onizlemeGuncelle()" />
+                                        <label class="form-check-label" style="font-size:0.88rem;">Tarih Aralığı</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;">
+                            <i class="bi bi-check-lg me-1"></i>Güncelle
+                        </button>
+                        <a href="/Template/Index" class="btn btn-light px-4" style="border-radius:10px;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ: Önizleme -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm" style="border-radius:14px; position:sticky; top:70px;">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-eye me-2 text-primary"></i>Canlı Önizleme
+                </h6>
+                <div id="onizlemeAlani">
+                    <div class="text-center text-muted py-5" style="font-size:0.88rem;">
+                        <i class="bi bi-layout-text-window display-5 d-block mb-2 opacity-25"></i>
+                        Layout seçilince önizleme burada görünür
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var layoutVerileri = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(
+                ((IEnumerable<dynamic>)ViewBag.Layoutlar).Select(l => new {
+                    kod = (string)l.LayoutKodu,
+                    json = (string)l.LayoutJson
+                })
+            )
+        );
+        var placeholders = {
+            'Baslik': 'BAŞLIK',
+            'AltBaslik': 'Alt Başlık Metni',
+            'KampanyaNotu': 'Kampanya notu buraya gelir',
+            'Subheadline': 'Ürün Alt Satır',
+            'Headline': 'Ürün Ana Satır',
+            'MinBasketText': '150 TL ve üzeri geçerli',
+            'DetailText': 'Ürün detay satırı',
+            'OriginalPrice': '149,90',
+            'DiscountedPrice': '99,90',
+            'DateRange': '1 - 15 Nisan 2025',
+            'CampaignDescription': 'Kampanya açıklaması',
+            'IsLocalProduction': true,
+            'OriginCountry': 'Türkiye',
+            'UnitPrice': '1 kg = 49,95 TL',
+            'PriceUpdateDate': '01.04.2025',
+            'BuyQuantityText': '3 AL',
+            'PayQuantityText': '2 ÖDE'
+        };
+
+        var alanMap = {
+            'AlanBaslik': 'Baslik', 'AlanAltBaslik': 'AltBaslik',
+            'AlanKampanyaNotu': 'KampanyaNotu', 'AlanSubheadline': 'Subheadline',
+            'AlanOriginalPrice': 'OriginalPrice', 'AlanDiscountedPrice': 'DiscountedPrice',
+            'AlanBuyQuantityText': 'BuyQuantityText', 'AlanPayQuantityText': 'PayQuantityText',
+            'AlanHeadline': 'Headline', 'AlanMinBasketText': 'MinBasketText',
+            'AlanDetailText': 'DetailText', 'AlanCampaignDescription': 'CampaignDescription',
+            'AlanIsLocalProduction': 'IsLocalProduction', 'AlanOriginCountry': 'OriginCountry',
+            'AlanUnitPrice': 'UnitPrice', 'AlanPriceUpdateDate': 'PriceUpdateDate',
+            'AlanDateRange': 'DateRange'
+        };
+
+        function layoutSecildi(kod) {
+            if (!kod) kod = document.querySelector('[name="LayoutKodu"]').value;
+            if (!kod) {
+                document.getElementById('onizlemeAlani').innerHTML =
+                    '<div class="text-center text-muted py-5" style="font-size:0.88rem;"><i class="bi bi-layout-text-window display-5 d-block mb-2 opacity-25"></i>Layout seçilince önizleme burada görünür</div>';
+                return;
+            }
+            var bulunan = layoutVerileri.find(function(l) { return l.kod === kod; });
+            if (!bulunan || !bulunan.json) {
+                document.getElementById('onizlemeAlani').innerHTML =
+                    '<div class="text-center text-muted py-5 text-warning" style="font-size:0.88rem;"><i class="bi bi-exclamation-circle display-5 d-block mb-2"></i>Bu layoutun tasarımı henüz çizilmemiş.</div>';
+                return;
+            }
+            var layoutJson = JSON.parse(bulunan.json);
+            onizlemeBuildFromJson(layoutJson);
+            onizlemeGuncelle();
+        }
+
+        function onizlemeBuild_3al2ode() {
+            document.getElementById('onizlemeAlani').innerHTML = `
+                <div style="width:280px;height:380px;background:#fff;border:2px solid #e0e0e0;border-radius:8px;
+                            display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+                            padding:20px 16px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+                            margin:0 auto;overflow:hidden;">
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_Baslik" style="display:none;font-size:1.8rem;font-weight:900;color:#e63946;text-transform:uppercase;line-height:1.1;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_AltBaslik" style="display:none;font-size:0.95rem;color:#222;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                        <div id="prev_BuyQuantityText" style="display:none;font-size:2rem;font-weight:900;color:#e63946;text-transform:uppercase;line-height:1.2;"></div>
+                        <div id="prev_PayQuantityText" style="display:none;font-size:2rem;font-weight:900;color:#e63946;text-transform:uppercase;line-height:1.2;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_DateRange" style="display:none;font-size:0.82rem;color:#444;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_KampanyaNotu" style="display:none;font-size:0.72rem;color:#666;line-height:1.4;"></div>
+                    </div>
+                </div>`;
+        }
+
+        function onizlemeBuild_tutar() {
+            document.getElementById('onizlemeAlani').innerHTML = `
+                <div style="width:280px;height:380px;background:#fff;border:2px solid #e0e0e0;border-radius:8px;
+                            display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+                            padding:20px 16px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+                            margin:0 auto;overflow:hidden;position:relative;">
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_Baslik" style="display:none;font-size:1.2rem;font-weight:900;color:#111;text-transform:uppercase;line-height:1.2;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_MinBasketText" style="display:none;font-size:0.82rem;font-weight:600;color:#e63946;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_Headline" style="display:none;font-size:0.95rem;font-weight:700;color:#111;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;">
+                        <div id="prev_Subheadline" style="display:none;font-size:0.8rem;color:#444;"></div>
+                        <div id="prev_DetailText" style="display:none;font-size:0.8rem;color:#444;"></div>
+                    </div>
+                    <div style="text-align:center;width:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+                        <div id="prev_OriginalPrice" style="display:none;"></div>
+                        <div id="prev_DiscountedPrice" style="display:none;font-size:2rem;font-weight:900;color:#111;"></div>
+                    </div>
+                    <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-end;">
+                        <div style="text-align:left;flex:1;">
+                            <div id="prev_DateRange" style="display:none;font-size:0.75rem;font-weight:700;color:#111;"></div>
+                            <div id="prev_CampaignDescription" style="display:none;font-size:0.72rem;color:#444;"></div>
+                        </div>
+                        <div style="text-align:right;min-width:80px;">
+                            <div id="prev_IsLocalProduction" style="display:none;margin-bottom:4px;">
+                                <img src="/img/yerliuretimkirmizi.svg" style="width:40px;height:auto;" />
+                            </div>
+                            <div id="prev_OriginCountry" style="display:none;font-size:0.6rem;color:#555;"></div>
+                            <div id="prev_UnitPrice" style="display:none;font-size:0.6rem;color:#555;"></div>
+                            <div id="prev_PriceUpdateDate" style="display:none;font-size:0.6rem;color:#555;"></div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+       function onizlemeGuncelle() {
+    Object.keys(alanMap).forEach(function(cbId) {
+        var alan = alanMap[cbId];
+        var cb = document.getElementById(cbId);
+        var prev = document.getElementById('prev_' + alan);
+        if (!cb || !prev) return;
+
+        if (cb.checked) {
+            var deger = placeholders[alan];
+            if (alan === 'IsLocalProduction') {
+                prev.style.display = 'flex';
+            } else {
+                var metin = prev.querySelector('.prev-metin') || prev;
+                if (alan === 'OriginalPrice' || alan === 'DiscountedPrice') {
+                    metin.textContent = '₺' + deger;
+                } else {
+                    metin.textContent = deger;
+                }
+                prev.style.display = 'flex';
+            }
+        } else {
+            prev.style.display = 'none';
+        }
+    });
+}
+       function onizlemeBuildFromJson(layoutJson) {
+    var kanvas = document.getElementById('onizlemeAlani');
+    var w = layoutJson.genislik || 300;
+    var h = layoutJson.yukseklik || 400;
+    var bg = layoutJson.arkaplan || '#fff';
+
+    var maxW = 320;
+    var scale = w > maxW ? maxW / w : 1;
+    var scaledH = Math.round(h * scale);
+
+    var inner = '<div style="width:' + maxW + 'px; height:' + scaledH + 'px; margin:0 auto; overflow:hidden;">'
+        + '<div style="width:' + w + 'px; height:' + h + 'px; background:' + bg + ';'
+        + 'border:2px solid #e0e0e0; border-radius:8px; position:relative;'
+        + 'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;'
+        + 'transform:scale(' + scale + '); transform-origin:top left; overflow:hidden;">';
+
+    (layoutJson.alanlar || []).forEach(function(alan) {
+        var justify = alan.textAlign === 'center' ? 'center' : (alan.textAlign === 'right' ? 'flex-end' : 'flex-start');
+        if (alan.ad === 'IsLocalProduction') {
+            inner += '<div id="prev_' + alan.ad + '" style="position:absolute;'
+                + 'left:' + alan.x + 'px; top:' + alan.y + 'px;'
+                + 'width:' + alan.width + 'px; height:' + alan.height + 'px;'
+                + 'display:none; align-items:center; justify-content:center;'
+                + 'overflow:hidden; box-sizing:border-box;">'
+                + '<img src="/img/yerliuretimkirmizi.svg" style="width:100%;height:100%;object-fit:contain;" />'
+                + '</div>';
+        } else {
+            var efektSvg = '';
+var ef = alan.efektler || {};
+if (Object.values(ef).some(function(v){ return v===true; })) {
+    var renk = ef.renk || '#e63946';
+    var ek = ef.kalinlik || 2;
+    var pw = alan.width, ph = alan.height;
+    var cw = (ef.uzunluk && ef.uzunluk > 0) ? ef.uzunluk : pw;
+    var ch = (ef.yukseklik && ef.yukseklik > 0) ? ef.yukseklik : ph;
+    var ox = (pw - cw) / 2;
+    var oy = (ph - ch) / 2;
+    var lines = '';
+    if (ef.ust)      lines += '<line x1="0" y1="1" x2="' + pw + '" y2="1" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    if (ef.alt)      lines += '<line x1="0" y1="' + (ph-1) + '" x2="' + pw + '" y2="' + (ph-1) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    if (ef.sol)      lines += '<line x1="1" y1="0" x2="1" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    if (ef.sag)      lines += '<line x1="' + (pw-1) + '" y1="0" x2="' + (pw-1) + '" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    if (ef.carpraz1) lines += '<line x1="' + ox + '" y1="' + oy + '" x2="' + (ox+cw) + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    if (ef.carpraz2) lines += '<line x1="' + (ox+cw) + '" y1="' + oy + '" x2="' + ox + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+    efektSvg = '<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="' + pw + '" height="' + ph + '">' + lines + '</svg>';
+}
+        var fontFamilyStyle = alan.fontAilesi ? alan.fontAilesi : 'inherit';
+        inner += '<div id="prev_' + alan.ad + '" style="position:absolute;'
+            + 'left:' + alan.x + 'px; top:' + alan.y + 'px;'
+            + 'width:' + alan.width + 'px; height:' + alan.height + 'px;'
+            + 'font-size:' + alan.fontSize + 'px; font-weight:' + alan.fontWeight + ';'
+            + 'color:' + alan.color + '; text-align:' + alan.textAlign + ';'
+            + 'font-family:' + fontFamilyStyle + ';'
+            + 'display:none; align-items:center; justify-content:' + justify + ';'
+            + 'overflow:hidden; box-sizing:border-box; padding:2px 4px;">'
+            + efektSvg
+            + '<span class="prev-metin" style="position:relative; z-index:1;"></span>'
+            + '</div>';
+        }
+    });
+
+    (layoutJson.cizgiler || []).forEach(function(c) {
+        var w2 = c.width, h2 = c.height, lines = '';
+        if (c.yon === 'yatay')     lines = '<line x1="0" y1="' + (h2/2) + '" x2="' + w2 + '" y2="' + (h2/2) + '" stroke="' + c.renk + '" stroke-width="' + c.kalinlik + '"/>';
+        else if (c.yon === 'dikey')     lines = '<line x1="' + (w2/2) + '" y1="0" x2="' + (w2/2) + '" y2="' + h2 + '" stroke="' + c.renk + '" stroke-width="' + c.kalinlik + '"/>';
+        else if (c.yon === 'carpraz1')  lines = '<line x1="0" y1="0" x2="' + w2 + '" y2="' + h2 + '" stroke="' + c.renk + '" stroke-width="' + c.kalinlik + '"/>';
+        else if (c.yon === 'carpraz2')  lines = '<line x1="' + w2 + '" y1="0" x2="0" y2="' + h2 + '" stroke="' + c.renk + '" stroke-width="' + c.kalinlik + '"/>';
+        inner += '<div style="position:absolute;left:' + c.x + 'px;top:' + c.y + 'px;width:' + w2 + 'px;height:' + h2 + 'px;">'
+            + '<svg width="' + w2 + '" height="' + h2 + '" style="display:block;">' + lines + '</svg>'
+            + '</div>';
+    });
+
+    inner += '</div></div>';
+    kanvas.innerHTML = inner;
+}
+
+        // Sayfa açılınca mevcut layout ve seçili alanları önizlemeye yansıt
+        window.addEventListener('load', function() {
+            var layoutKodu = document.querySelector('[name="LayoutKodu"]').value;
+            if (layoutKodu) {
+                layoutSecildi();
+            }
+        });
+    </script>
+}

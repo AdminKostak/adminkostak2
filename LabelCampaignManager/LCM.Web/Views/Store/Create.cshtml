@@ -1,0 +1,47 @@
+﻿@model LCM.Domain.Entities.Store
+@{
+    ViewData["Title"] = "Yeni Şube";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-shop me-2"></i>Yeni Şube</h4>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Geri
+    </a>
+</div>
+
+<div class="card shadow-sm" style="max-width:480px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="StoreCode" class="form-label">Şube Kodu</label>
+                <input asp-for="StoreCode" class="form-control" placeholder="örn: 1344" />
+                <span asp-validation-for="StoreCode" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StoreName" class="form-label">Şube Adı</label>
+                <input asp-for="StoreName" class="form-control" placeholder="örn: Bağcılar Şubesi" />
+                <span asp-validation-for="StoreName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="AktifMi" class="form-check-input" type="checkbox" />
+                <label asp-for="AktifMi" class="form-check-label">Aktif</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-floppy me-1"></i>Kaydet
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

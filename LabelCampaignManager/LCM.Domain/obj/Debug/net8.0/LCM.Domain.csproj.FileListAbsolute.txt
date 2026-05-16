@@ -1,0 +1,11 @@
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\bin\Debug\net8.0\LCM.Domain.deps.json
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\bin\Debug\net8.0\LCM.Domain.dll
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\bin\Debug\net8.0\LCM.Domain.pdb
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.AssemblyInfoInputs.cache
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.AssemblyInfo.cs
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.csproj.CoreCompileInputs.cache
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.dll
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\refint\LCM.Domain.dll
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\LCM.Domain.pdb
+C:\Users\muhammed.kostak\source\repos\LabelCampaignManager\LCM.Domain\obj\Debug\net8.0\ref\LCM.Domain.dll

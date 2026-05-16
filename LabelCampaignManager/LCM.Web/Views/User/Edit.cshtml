@@ -1,0 +1,119 @@
+﻿@model LCM.Web.ViewModels.UserEditViewModel
+@{
+    ViewData["Title"] = "Kullanıcı Düzenle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm" style="border-radius:14px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-1">Kullanıcı Düzenle</h5>
+                <p class="text-muted mb-4" style="font-size:0.88rem;">Şifreyi boş bırakırsan değişmez</p>
+
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <div asp-validation-summary="All" class="alert alert-danger" style="font-size:0.88rem;"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-500" style="font-size:0.88rem;">Ad</label>
+                            <input asp-for="Ad" class="form-control" style="border-radius:10px;" />
+                            <span asp-validation-for="Ad" class="text-danger" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-500" style="font-size:0.88rem;">Soyad</label>
+                            <input asp-for="Soyad" class="form-control" style="border-radius:10px;" />
+                            <span asp-validation-for="Soyad" class="text-danger" style="font-size:0.82rem;"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Kullanıcı Adı</label>
+                        <input asp-for="KullaniciAdi" class="form-control" style="border-radius:10px;" />
+                        <span asp-validation-for="KullaniciAdi" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">E-posta</label>
+                        <input asp-for="Email" class="form-control" style="border-radius:10px;" />
+                        <span asp-validation-for="Email" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">
+                            Yeni Şifre <span class="text-muted">(boş bırakılırsa değişmez)</span>
+                        </label>
+                        <input asp-for="YeniSifre" class="form-control" type="password" style="border-radius:10px;" />
+                        <span asp-validation-for="YeniSifre" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Rol</label>
+                        <select asp-for="RolId" asp-items="ViewBag.Roller"
+                                class="form-select" style="border-radius:10px;">
+                        </select>
+                        <span asp-validation-for="RolId" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+                    <div id="operatorAlanlari" style="display:none;">
+                        <hr />
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="CokluEslestirmeIzni" id="CokluEslestirmeIzni" />
+                                <label class="form-check-label" for="CokluEslestirmeIzni">Çoklu Eşleştirme İzni</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="HizliEslestirmeIzni" id="HizliEslestirmeIzni" />
+                                <label class="form-check-label" for="HizliEslestirmeIzni">Hızlı Eşleştirme İzni</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yetkili Üretim Yerleri</label>
+                            @if (ViewBag.Storeler != null)
+                            {
+                                foreach (var store in ViewBag.Storeler)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="YetkiliStoreIdler"
+                                               value="@store.Id"
+                                               id="store_@store.Id"
+                                               @(Model.YetkiliStoreIdler.Contains(store.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="store_@store.Id">
+                                            @store.StoreName
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input asp-for="AktifMi" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label" style="font-size:0.88rem;">Aktif</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;">
+                            <i class="bi bi-check-lg me-1"></i>Güncelle
+                        </button>
+                        <a href="/User/Index" class="btn btn-light px-4" style="border-radius:10px;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function operatorGoster() {
+        var val = document.getElementById('RolId').value;
+        document.getElementById('operatorAlanlari').style.display = val == '4' ? 'block' : 'none';
+    }
+    document.getElementById('RolId').addEventListener('change', operatorGoster);
+    operatorGoster();
+</script>

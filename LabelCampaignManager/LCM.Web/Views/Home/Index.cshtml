@@ -1,0 +1,406 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var kullaniciAdi = User.FindFirst("AdSoyad")?.Value ?? "Kullanıcı";
+    var rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+    var bugun = DateTime.Now.ToString("dd MMMM yyyy, dddd", new System.Globalization.CultureInfo("tr-TR"));
+
+    int toplam   = (int)(ViewBag.ToplamKampanya  ?? 0);
+    int aktif    = (int)(ViewBag.AktifSayisi     ?? 0);
+    int pasif    = (int)(ViewBag.PasifSayisi     ?? 0);
+    int taslak   = (int)(ViewBag.TaslakSayisi    ?? 0);
+    int sablon   = (int)(ViewBag.ToplamSablon    ?? 0);
+    int etiket   = (int)(ViewBag.ToplamEtiketTipi?? 0);
+    int kullanici= (int)(ViewBag.ToplamKullanici ?? 0);
+    int aktifKamp= (int)(ViewBag.AktifKampanya   ?? 0);
+
+    double aktifYuzde  = toplam > 0 ? (aktif  * 100.0 / toplam) : 0;
+    double pasifYuzde  = toplam > 0 ? (pasif  * 100.0 / toplam) : 0;
+    double taslakYuzde = toplam > 0 ? (taslak * 100.0 / toplam) : 0;
+}
+
+<style>
+    /* ── Genel ── */
+    .db-grid { display: grid; gap: 1rem; }
+
+    /* ── Hero banner ── */
+    .db-hero {
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .db-hero::before {
+        content: '';
+        position: absolute; top: -60px; right: -60px;
+        width: 220px; height: 220px;
+        background: rgba(255,255,255,0.07);
+        border-radius: 50%;
+    }
+    .db-hero::after {
+        content: '';
+        position: absolute; bottom: -40px; right: 80px;
+        width: 140px; height: 140px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .db-hero-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .db-hero-sub   { font-size: 0.88rem; opacity: 0.75; }
+    .db-hero-date  { font-size: 0.82rem; opacity: 0.65; }
+
+    .db-rol-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px;
+        padding: 3px 12px;
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    /* ── Stat kartları ── */
+    .db-stat {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid #f0f4f8;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: transform .2s, box-shadow .2s;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .db-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.09); color: inherit; }
+    .db-stat-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; flex-shrink: 0;
+    }
+    .db-stat-val  { font-size: 1.6rem; font-weight: 700; line-height: 1; color: #111; }
+    .db-stat-lbl  { font-size: 0.78rem; color: #888; margin-top: 2px; }
+    .db-stat-sub  { font-size: 0.72rem; color: #aaa; margin-top: 3px; }
+
+    /* ── Kart genel ── */
+    .db-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #f0f4f8;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+    .db-card-head {
+        padding: 1.1rem 1.5rem 0.75rem;
+        border-bottom: 1px solid #f5f7fa;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .db-card-title {
+        font-size: 0.78rem; font-weight: 600;
+        color: #94a3b8; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .db-card-body { padding: 0.5rem 0; }
+
+    /* ── Kampanya satırı ── */
+    .db-kamp-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.65rem 1.5rem;
+        transition: background .15s;
+    }
+    .db-kamp-row:hover { background: #f8fafc; }
+    .db-kamp-sku {
+        width: 36px; height: 36px; border-radius: 10px;
+        background: #eff6ff; color: #2563eb;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── Durum progress ── */
+    .db-progress-row { padding: 0.6rem 1.5rem; }
+    .db-prog-bar {
+        height: 7px; border-radius: 4px;
+        background: #f0f4f8; overflow: hidden; margin: 4px 0;
+    }
+    .db-prog-fill { height: 100%; border-radius: 4px; transition: width .7s ease; }
+
+    /* ── Hızlı erişim ── */
+    .db-quick {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 0.4rem; padding: 1rem 0.5rem;
+        border-radius: 14px; border: 1.5px solid #f0f4f8;
+        text-decoration: none; color: #374151;
+        transition: all .2s; font-size: 0.78rem; text-align: center;
+        background: white;
+    }
+    .db-quick:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+    .db-quick i { font-size: 1.3rem; }
+</style>
+
+@*-- ── Hero ─────────────────────────────────────────────────── *@
+<div class="db-hero">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div style="position:relative; z-index:1;">
+            <div class="db-hero-title">Merhaba, @kullaniciAdi 👋</div>
+            <div class="db-hero-sub">LabelCampaign Manager — Kampanya Yönetim Paneli</div>
+            <div class="db-rol-badge">
+                <i class="bi bi-shield-check me-1"></i>@rol
+            </div>
+        </div>
+        <div class="db-hero-date" style="position:relative; z-index:1; text-align:right;">
+            <i class="bi bi-calendar3 me-1"></i>@bugun
+        </div>
+    </div>
+</div>
+
+@*-- ── Stat Kartları ────────────────────────────────────────── *@
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="/Campaign/Index" class="db-stat">
+            <div class="db-stat-icon" style="background:#eff6ff; color:#2563eb;">
+                <i class="bi bi-megaphone-fill"></i>
+            </div>
+            <div>
+                <div class="db-stat-val">@toplam</div>
+                <div class="db-stat-lbl">Toplam Kampanya</div>
+                <div class="db-stat-sub" style="color:#16a34a;">@aktifKamp aktif</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="/Template/Index" class="db-stat">
+            <div class="db-stat-icon" style="background:#f0fdf4; color:#16a34a;">
+                <i class="bi bi-layout-text-window-reverse"></i>
+            </div>
+            <div>
+                <div class="db-stat-val">@sablon</div>
+                <div class="db-stat-lbl">Şablon</div>
+                <div class="db-stat-sub">Aktif şablonlar</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="/LabelType/Index" class="db-stat">
+            <div class="db-stat-icon" style="background:#fff7ed; color:#ea580c;">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+            <div>
+                <div class="db-stat-val">@etiket</div>
+                <div class="db-stat-lbl">Etiket Tipi</div>
+                <div class="db-stat-sub">Tanımlı tipler</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="/User/Index" class="db-stat">
+                <div class="db-stat-icon" style="background:#fdf4ff; color:#9333ea;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="db-stat-val">@kullanici</div>
+                    <div class="db-stat-lbl">Aktif Kullanıcı</div>
+                    <div class="db-stat-sub">Sisteme erişim var</div>
+                </div>
+            </a>
+        }
+        else
+        {
+            <div class="db-stat" style="cursor:default;">
+                <div class="db-stat-icon" style="background:#fdf4ff; color:#9333ea;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="db-stat-val">@kullanici</div>
+                    <div class="db-stat-lbl">Aktif Kullanıcı</div>
+                    <div class="db-stat-sub">Sisteme erişim var</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@*-- ── Alt Grid ────────────────────────────────────────────── *@
+<div class="row g-3">
+
+    @*-- Son Kampanyalar *@
+    <div class="col-md-5">
+        <div class="db-card h-100">
+            <div class="db-card-head">
+                <span class="db-card-title"><i class="bi bi-clock-history me-1"></i>Son Kampanyalar</span>
+                <a href="/Campaign/Index" style="font-size:0.78rem; color:#2563eb; text-decoration:none;">
+                    Tümü →
+                </a>
+            </div>
+            <div class="db-card-body">
+                @if (ViewBag.SonKampanyalar != null)
+                {
+                    foreach (var k in ViewBag.SonKampanyalar)
+                    {
+                        string kDurum = k.Durum ?? "Taslak";
+                        var (kBg, kRenk, kEtiket) = kDurum switch
+                        {
+                            "Aktif"          => ("#f0fdf4", "#16a34a", "Aktif"),
+                            "Pasif"          => ("#fef2f2", "#dc2626", "Pasif"),
+                            "Planlanmış"     => ("#f0f4ff", "#6366f1", "Planlanmış"),
+                            "Onay Bekliyor"  => ("#fffbeb", "#d97706", "Onay Bekliyor"),
+                            "Onaylandı"      => ("#f0fdf4", "#16a34a", "Onaylandı"),
+                            "Reddedildi"     => ("#fef2f2", "#dc2626", "Reddedildi"),
+                            "Revize İstendi" => ("#fffbeb", "#d97706", "Revize"),
+                            _                => ("#f8fafc", "#64748b", "Taslak")
+                        };
+                        <div class="db-kamp-row">
+                            <div class="db-kamp-sku">@k.Sku.ToString().Substring(Math.Max(0, k.Sku.ToString().Length - 4))</div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:0.85rem; font-weight:600; color:#111;
+                                            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    @(k.Baslik ?? "—")
+                                </div>
+                                <div style="font-size:0.72rem; color:#94a3b8;">
+                                    @k.Sablon?.SablonAdi · @k.OlusturmaTarihi.ToString("dd.MM.yyyy")
+                                </div>
+                            </div>
+                            <span style="background:@kBg; color:@kRenk; border-radius:20px;
+                                         font-size:0.7rem; padding:2px 9px; white-space:nowrap; flex-shrink:0;">
+                                @kEtiket
+                            </span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5" style="font-size:0.85rem;">
+                        <i class="bi bi-inbox d-block mb-2" style="font-size:1.5rem;"></i>
+                        Henüz kampanya yok
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @*-- Durum Dağılımı + Hızlı Erişim *@
+    <div class="col-md-7">
+        <div class="row g-3 h-100">
+
+            @*-- Durum Dağılımı *@
+            <div class="col-12">
+                <div class="db-card">
+                    <div class="db-card-head">
+                        <span class="db-card-title"><i class="bi bi-bar-chart me-1"></i>Durum Dağılımı</span>
+                        <span style="font-size:0.75rem; color:#94a3b8;">@toplam toplam</span>
+                    </div>
+                    <div style="padding: 0.75rem 1.5rem 1rem;">
+                        @if (toplam == 0)
+                        {
+                            <div class="text-center text-muted py-3" style="font-size:0.85rem;">Henüz kampanya yok</div>
+                        }
+                        else
+                        {
+                            @*-- Aktif *@
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="width:90px; font-size:0.8rem; color:#374151; font-weight:500; flex-shrink:0;">
+                                    <i class="bi bi-check-circle me-1" style="color:#16a34a;"></i>Aktif
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="db-prog-bar">
+                                        <div class="db-prog-fill" style="width:@aktifYuzde.ToString("F0")%; background:#16a34a;"></div>
+                                    </div>
+                                </div>
+                                <div style="width:50px; text-align:right; font-size:0.8rem; font-weight:600; color:#111;">@aktif</div>
+                                <div style="width:36px; text-align:right; font-size:0.72rem; color:#94a3b8;">%@aktifYuzde.ToString("F0")</div>
+                            </div>
+                            @*-- Pasif *@
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="width:90px; font-size:0.8rem; color:#374151; font-weight:500; flex-shrink:0;">
+                                    <i class="bi bi-x-circle me-1" style="color:#dc2626;"></i>Pasif
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="db-prog-bar">
+                                        <div class="db-prog-fill" style="width:@pasifYuzde.ToString("F0")%; background:#dc2626;"></div>
+                                    </div>
+                                </div>
+                                <div style="width:50px; text-align:right; font-size:0.8rem; font-weight:600; color:#111;">@pasif</div>
+                                <div style="width:36px; text-align:right; font-size:0.72rem; color:#94a3b8;">%@pasifYuzde.ToString("F0")</div>
+                            </div>
+                            @*-- Taslak *@
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:90px; font-size:0.8rem; color:#374151; font-weight:500; flex-shrink:0;">
+                                    <i class="bi bi-pencil-square me-1" style="color:#ca8a04;"></i>Taslak
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="db-prog-bar">
+                                        <div class="db-prog-fill" style="width:@taslakYuzde.ToString("F0")%; background:#ca8a04;"></div>
+                                    </div>
+                                </div>
+                                <div style="width:50px; text-align:right; font-size:0.8rem; font-weight:600; color:#111;">@taslak</div>
+                                <div style="width:36px; text-align:right; font-size:0.72rem; color:#94a3b8;">%@taslakYuzde.ToString("F0")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @*-- Hızlı Erişim *@
+            <div class="col-12">
+                <div class="db-card">
+                    <div class="db-card-head">
+                        <span class="db-card-title"><i class="bi bi-lightning me-1"></i>Hızlı Erişim</span>
+                    </div>
+                    <div style="padding:1rem 1.25rem;">
+                        <div class="row g-2">
+                            @if (User.IsInRole("Admin") || User.IsInRole("KampanyaYonetici") || User.IsInRole("VeriGirisi"))
+                            {
+                                <div class="col-4 col-md-3">
+                                    <a href="/Campaign/Create" class="db-quick">
+                                        <i class="bi bi-plus-circle-fill" style="color:#2563eb;"></i>
+                                        <span>Yeni Kampanya</span>
+                                    </a>
+                                </div>
+                            }
+                            <div class="col-4 col-md-3">
+                                <a href="/Campaign/Index" class="db-quick">
+                                    <i class="bi bi-list-ul" style="color:#6366f1;"></i>
+                                    <span>Kampanyalar</span>
+                                </a>
+                            </div>
+                            @if (User.IsInRole("Admin") || User.IsInRole("KampanyaYonetici"))
+                            {
+                                <div class="col-4 col-md-3">
+                                    <a href="/Campaign/OnayBekleyenler" class="db-quick">
+                                        <i class="bi bi-hourglass-split" style="color:#d97706;"></i>
+                                        <span>Onay Bekleyenler</span>
+                                    </a>
+                                </div>
+                            }
+                            <div class="col-4 col-md-3">
+                                <a href="/Template/Index" class="db-quick">
+                                    <i class="bi bi-layout-text-window-reverse" style="color:#16a34a;"></i>
+                                    <span>Şablonlar</span>
+                                </a>
+                            </div>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="col-4 col-md-3">
+                                    <a href="/User/Index" class="db-quick">
+                                        <i class="bi bi-people" style="color:#9333ea;"></i>
+                                        <span>Kullanıcılar</span>
+                                    </a>
+                                </div>
+                                <div class="col-4 col-md-3">
+                                    <a href="/SystemSetting/Index" class="db-quick">
+                                        <i class="bi bi-gear" style="color:#64748b;"></i>
+                                        <span>Ayarlar</span>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

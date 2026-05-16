@@ -1,0 +1,330 @@
+﻿@model List<LCM.Domain.Entities.Campaign>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Kampanya Listesi Baskı</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            padding: 2rem;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .page-header h4 {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #111;
+            }
+
+            .page-header span {
+                font-size: 0.82rem;
+                color: #888;
+            }
+
+        .print-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .print-btn:hover {
+                background: #1d4ed8;
+            }
+
+        .back-btn {
+            background: white;
+            color: #555;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            text-decoration: none;
+        }
+
+        /* Tablo */
+        .tablo-kart {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th {
+            padding: 0.9rem 1rem;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid #f8f8f8;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .sku {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .baslik-text {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .alt-baslik-text {
+            font-size: 0.78rem;
+            color: #888;
+            margin-top: 0.15rem;
+        }
+
+        .sablon-badge {
+            background: #eff6ff;
+            color: #2563eb;
+            border-radius: 20px;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .tarih-text {
+            font-size: 0.78rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+            .tarih-text span {
+                display: inline-block;
+                width: 14px;
+                text-align: center;
+                margin-right: 2px;
+            }
+
+        .barkod-cell {
+            text-align: center;
+        }
+
+            .barkod-cell svg {
+                display: block;
+                margin: 0 auto;
+            }
+
+        .barkod-no {
+            font-size: 0.7rem;
+            color: #888;
+            font-family: monospace;
+            margin-top: 2px;
+        }
+
+        .toplam-bilgi {
+            padding: 0.8rem 1rem;
+            background: #f8fafc;
+            border-top: 1px solid #f0f0f0;
+            font-size: 0.82rem;
+            color: #888;
+            text-align: right;
+        }
+
+        @@media print {
+            body {
+                background: white;
+                padding: 0.5rem;
+            }
+
+            .print-btn {
+                display: none;
+            }
+
+            .back-btn {
+                display: none;
+            }
+
+            .page-header {
+                box-shadow: none;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+
+            .tablo-kart {
+                box-shadow: none;
+                border: 1px solid #eee;
+                border-radius: 8px;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Bar -->
+    <div class="page-header">
+        <div>
+            <h4>🏷️ Kampanya Listesi</h4>
+            <span>Toplam @Model.Count kampanya — @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</span>
+        </div>
+        <div>
+            <a href="/Campaign/Index" class="back-btn">← Geri</a>
+            <button class="print-btn" onclick="window.print()">🖨️ Yazdır</button>
+        </div>
+    </div>
+
+    <!-- Tablo -->
+    <div class="tablo-kart">
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>BAŞLIK / ALT BAŞLIK</th>
+                    <th>ŞABLON</th>
+                    <th>TARİH ARALIĞI</th>
+                    <th style="text-align:center;">BARKOD</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="sku">@item.Sku</div>
+                        </td>
+                        <td>
+                            <div class="baslik-text">@(item.Baslik ?? "—")</div>
+                            @if (!string.IsNullOrEmpty(item.AltBaslik))
+                            {
+                                <div class="alt-baslik-text">@item.AltBaslik</div>
+                            }
+                            <div style="margin-top:0.3rem; font-size:0.72rem; color:#aaa; line-height:1.6;">
+                                @if (!string.IsNullOrEmpty(item.MinBasketText))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.MinBasketText</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.Headline))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.Headline</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.Subheadline))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.Subheadline</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.DetailText))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.DetailText</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.BuyQuantityText))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.BuyQuantityText</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.PayQuantityText))
+                                {
+                                    <span style="margin-right:0.5rem;">@item.PayQuantityText</span>
+                                }
+                                @if (item.DiscountedPrice.HasValue)
+                                {
+                                    <span style="margin-right:0.5rem; color:#16a34a; font-weight:600;">₺@item.DiscountedPrice.Value.ToString("N2")</span>
+                                }
+                                @if (item.OriginalPrice.HasValue)
+                                {
+                                    <span style="margin-right:0.5rem; text-decoration:line-through;">₺@item.OriginalPrice.Value.ToString("N2")</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.DateRange))
+                                {
+                                    <span>@item.DateRange</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <span class="sablon-badge">@item.Sablon?.SablonAdi</span>
+                        </td>
+                        <td>
+                            <div class="tarih-text">
+                                <span>📅</span>@item.BaslangicTarihi.ToString("dd.MM.yyyy")<br />
+                                <span>🔚</span>@item.BitisTarihi.ToString("dd.MM.yyyy")
+                            </div>
+                        </td>
+                        <td class="barkod-cell">
+                            <svg id="barkod_@item.Id"></svg>
+                            <div class="barkod-no">@item.Barkod</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="toplam-bilgi">
+            Toplam @Model.Count kayıt listelendi.
+        </div>
+    </div>
+
+    <script>
+        // Her satır için barkod üret
+        @foreach (var item in Model)
+        {
+                <text>
+                JsBarcode("#barkod_@item.Id", "@item.Barkod", {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 45,
+                    displayValue: false,
+                    margin: 0
+                });
+                </text>
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+﻿@model IEnumerable<LCM.Domain.Entities.Campaign>
+@{
+    ViewData["Title"] = "Kampanyalarım";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Kampanyalarım</h5>
+        <p class="text-muted mb-0" style="font-size:0.88rem;">
+            Toplam @Model.Count() kampanya
+        </p>
+    </div>
+    <a href="/Campaign/Create" class="btn btn-primary px-4" style="border-radius:10px;">
+        <i class="bi bi-plus-lg me-1"></i>Yeni Kampanya
+    </a>
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" style="border-radius:10px;">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Basari"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm" style="border-radius:14px;">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox display-4 text-muted opacity-50 d-block mb-3"></i>
+            <p class="text-muted">Henüz kampanya oluşturmadınız.</p>
+            <a href="/Campaign/Create" class="btn btn-primary px-4" style="border-radius:10px;">
+                <i class="bi bi-plus-lg me-1"></i>İlk Kampanyayı Oluştur
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var k in Model)
+        {
+            var (renkBg, renkText, ikon, etiket) = k.Durum switch
+            {
+                "Aktif" => ("#f0fdf4", "#16a34a", "bi-check-circle", "Aktif"),
+                "Onay Bekliyor" => ("#eff6ff", "#2563eb", "bi-clock", "Onay Bekliyor"),
+                "Onaylandı" => ("#f0fdf4", "#16a34a", "bi-check2-all", "Onaylandı"),
+                "Reddedildi" => ("#fef2f2", "#dc2626", "bi-x-circle", "Reddedildi"),
+                "Revize İstendi" => ("#fffbeb", "#d97706", "bi-pencil-square", "Revize İstendi"),
+                "Planlanmış" => ("#f0f4ff", "#6366f1", "bi-calendar-check", "Planlanmış"),
+                "Pasif" => ("#f8fafc", "#64748b", "bi-pause-circle", "Pasif"),
+                _ => ("#f8fafc", "#64748b", "bi-question-circle", k.Durum)
+            };
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:14px;">
+                    <div class="card-body p-4">
+
+                        <!-- Başlık + Statü -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">@(k.Baslik ?? "—")</h6>
+                                <div style="font-size:0.78rem; color:#888;">SKU: @k.Sku</div>
+                            </div>
+                            <span class="badge rounded-pill px-2 py-1"
+                                  style="background:@renkBg; color:@renkText; font-size:0.75rem;">
+                                <i class="bi @ikon me-1"></i>@etiket
+                            </span>
+                        </div>
+
+                        <!-- Bilgiler -->
+                        <div class="mb-3" style="font-size:0.84rem;">
+                            <div class="d-flex justify-content-between py-1"
+                                 style="border-bottom:1px solid #f0f0f0;">
+                                <span class="text-muted">Şablon</span>
+                                <span>@k.Sablon?.SablonAdi</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1"
+                                 style="border-bottom:1px solid #f0f0f0;">
+                                <span class="text-muted">Tarih</span>
+                                <span>@k.BaslangicTarihi.ToString("dd.MM.yyyy") - @k.BitisTarihi.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            @if (k.DiscountedPrice.HasValue)
+                            {
+                                <div class="d-flex justify-content-between py-1"
+                                     style="border-bottom:1px solid #f0f0f0;">
+                                    <span class="text-muted">Fiyat</span>
+                                    <span class="fw-bold text-success">₺@k.DiscountedPrice.Value.ToString("N2")</span>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between py-1">
+                                <span class="text-muted">Kimde</span>
+                                <span>
+                                    @if (k.CurrentOwner != null)
+                                    {
+                                        <span style="color:#2563eb;">
+                                            @k.CurrentOwner.Ad @k.CurrentOwner.Soyad
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Revize yorumu -->
+                        @if (k.Durum == "Onaylandı" || k.Durum == "Aktif" || k.Durum == "Planlanmış")
+                        {
+                            <div class="mb-3 p-2"
+                                 style="background:#f0fdf4; border-radius:8px; border-left:3px solid #16a34a;">
+                                <div style="font-size:0.75rem; color:#166534; font-weight:600; margin-bottom:2px;">
+                                    <i class="bi bi-check-circle me-1"></i>Onaylandı
+                                </div>
+                                @if (k.CurrentOwner == null)
+                                {
+                                    <div style="font-size:0.82rem; color:#15803d;">Kampanyanız onaylandı.</div>
+                                }
+                            </div>
+                        }
+                        else if (k.Durum == "Reddedildi" && !string.IsNullOrEmpty(k.OnayYorumu))
+                        {
+                            <div class="mb-3 p-2"
+                                 style="background:#fef2f2; border-radius:8px; border-left:3px solid #f87171;">
+                                <div style="font-size:0.75rem; color:#991b1b; font-weight:600; margin-bottom:2px;">
+                                    <i class="bi bi-x-circle me-1"></i>Reddedildi
+                                </div>
+                                <div style="font-size:0.82rem; color:#b91c1c;">@k.OnayYorumu</div>
+                            </div>
+                        }
+                        else if (k.Durum == "Revize İstendi" && !string.IsNullOrEmpty(k.OnayYorumu))
+                        {
+                            <div class="mb-3 p-2"
+                                 style="background:#fffbeb; border-radius:8px; border-left:3px solid #d97706;">
+                                <div style="font-size:0.75rem; color:#92400e; font-weight:600; margin-bottom:2px;">
+                                    <i class="bi bi-pencil me-1"></i>Revize İstendi
+                                </div>
+                                <div style="font-size:0.82rem; color:#78350f;">@k.OnayYorumu</div>
+                            </div>
+                        }
+
+                        <!-- Butonlar -->
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="/Campaign/Detail/@k.Id"
+                                   class="btn btn-sm btn-light flex-fill" style="border-radius:8px;">
+                                <i class="bi bi-eye me-1"></i>Detay
+                            </a>
+                            @if (k.Durum == "Reddedildi" || k.Durum == "Revize İstendi" || k.Durum == "Taslak")
+                            {
+                                <a href="/Campaign/Edit/@k.Id"
+                                       class="btn btn-sm btn-outline-primary flex-fill" style="border-radius:8px;">
+                                    <i class="bi bi-pencil me-1"></i>Düzenle
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

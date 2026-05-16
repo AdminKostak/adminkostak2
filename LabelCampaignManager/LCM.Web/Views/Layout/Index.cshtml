@@ -1,0 +1,87 @@
+﻿@model List<LCM.Domain.Entities.Layout>
+@{
+    ViewData["Title"] = "Layoutlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Layoutlar</h5>
+        <small class="text-muted">Kampanya tasarımlarını yönet</small>
+    </div>
+    <a href="/Layout/Create" class="btn btn-primary btn-sm px-3">
+        <i class="bi bi-plus-lg me-1"></i>Yeni Layout
+    </a>
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Basari"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle me-2"></i>@TempData["Hata"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:16px;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold mb-0">@item.Ad</h6>
+                        <span class="badge rounded-pill px-2 py-1"
+                              style="background:#eff6ff; color:#2563eb; font-size:0.72rem;">
+                            @item.LayoutKodu
+                        </span>
+                    </div>
+                    <div class="text-muted mb-3" style="font-size:0.75rem;">
+                        <i class="bi bi-calendar3 me-1"></i>@item.OlusturmaTarihi.ToString("dd.MM.yyyy")
+                        @if (!string.IsNullOrEmpty(item.LayoutJson))
+                        {
+                            <span class="ms-2 text-success">
+                                <i class="bi bi-check-circle me-1"></i>Tasarım var
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="ms-2 text-warning">
+                                <i class="bi bi-exclamation-circle me-1"></i>Tasarım yok
+                            </span>
+                        }
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/Layout/Builder/@item.Id"
+                           class="btn btn-sm btn-outline-primary"
+                           style="border-radius:8px; flex:1;">
+                            <i class="bi bi-grid-1x2 me-1"></i>Tasarla
+                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <form method="post" action="/Layout/Delete/@item.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        style="border-radius:8px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center text-muted py-5">
+            <i class="bi bi-layout-text-window display-6 d-block mb-2"></i>
+            Henüz layout eklenmemiş.
+        </div>
+    }
+</div>

@@ -1,0 +1,574 @@
+﻿@model LCM.Web.ViewModels.CampaignEditViewModel
+@{
+    ViewData["Title"] = "Kampanya Düzenle";
+}
+
+<div class="row g-4">
+    <!-- SOL: Form -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm" style="border-radius:14px;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-1">Kampanya Düzenle</h5>
+                        <p class="text-muted mb-0" style="font-size:0.88rem;">SKU ve Barkod değiştirilemez</p>
+                    </div>
+                    <div class="text-end">
+                        <div style="font-size:0.78rem; color:#888;">SKU</div>
+                        <div style="font-size:1rem; font-weight:700;">@Model.Sku</div>
+                        <div style="font-size:0.78rem; color:#888;">@Model.Barkod</div>
+                    </div>
+                </div>
+
+                <form asp-action="Edit" method="post" id="kampanyaForm">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="Sku" type="hidden" />
+                    <input asp-for="Barkod" type="hidden" />
+                    <div asp-validation-summary="All" class="alert alert-danger" style="font-size:0.88rem;"></div>
+
+                    <!-- Şablon Seçimi -->
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">Şablon</label>
+                        <select asp-for="SablonId" asp-items="ViewBag.Sablonlar"
+                                class="form-select" style="border-radius:10px;"
+                                id="sablonSelect" onchange="sablonSecildi(this.value)">
+                        </select>
+                        <span asp-validation-for="SablonId" class="text-danger" style="font-size:0.82rem;"></span>
+                    </div>
+                    <!-- şube Seçimi -->
+
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">
+                            Şube <span class="text-danger">*</span>
+                        </label>
+                        <div class="border rounded p-2" style="border-radius:10px !important; max-height:160px; overflow-y:auto;">
+                            @foreach (var store in (List<LCM.Domain.Entities.Store>)ViewBag.Stores)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input store-check" type="checkbox"
+                                           name="StoreIds" value="@store.Id" id="store_@store.Id"
+                                           @(Model.StoreIds.Contains(store.Id) ? "checked" : "") />
+                                    <label class="form-check-label" for="store_@store.Id" style="font-size:0.88rem;">
+                                        @store.StoreCode - @store.StoreName
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <span class="text-danger small" id="storeHata" style="display:none;">En az bir şube seçiniz.</span>
+                    </div>
+                    <!-- Dinamik Alanlar -->
+                    <div id="dinamikAlanlar"></div>
+
+                    <!-- Tarih ve Durum -->
+                    <div id="tarihAlanlari">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-500" style="font-size:0.88rem;">Başlangıç Tarihi</label>
+                                <input asp-for="BaslangicTarihi" type="date" class="form-control"
+                                       style="border-radius:10px;" onchange="tarihGuncelle()"  />
+                                <span asp-validation-for="BaslangicTarihi" class="text-danger" style="font-size:0.82rem;"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-500" style="font-size:0.88rem;">Bitiş Tarihi</label>
+                                <input asp-for="BitisTarihi" type="date" class="form-control"
+                                       style="border-radius:10px;" onchange="tarihGuncelle()"/>
+                                <span asp-validation-for="BitisTarihi" class="text-danger" style="font-size:0.82rem;"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="dateRangeWrapper">
+                            <label class="form-label fw-500" style="font-size:0.88rem;">Tarih Aralığı Metni</label>
+                            <input type="text" name="DateRange" id="alan_DateRange" class="form-control"
+                                   style="border-radius:10px;"
+                                   value="@Model.DateRange" />
+                            <div class="text-muted mt-1" style="font-size:0.78rem;">
+                                <i class="bi bi-info-circle me-1"></i>Tarihler seçilince otomatik dolar, istersen düzenleyebilirsin.
+                            </div>
+                        </div>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-500" style="font-size:0.88rem;">Durum</label>
+                                <select asp-for="Durum" class="form-select" style="border-radius:10px;">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                    <option value="Planlanmış">Planlanmış</option>
+                                    <option value="Taslak">Taslak</option>
+                                </select>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="Durum" value="Taslak" />
+                        }
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;">
+                                <i class="bi bi-check-lg me-1"></i>Güncelle
+                            </button>
+                            <a href="/Campaign/Index" class="btn btn-light px-4" style="border-radius:10px;">
+                                İptal
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ: Canlı Önizleme -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm" style="border-radius:14px;">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-eye me-2 text-primary"></i>Canlı Önizleme
+                </h6>
+                <div id="onizlemeAlani">
+                    <div class="text-center text-muted py-5" style="font-size:0.88rem;">
+                        <i class="bi bi-layout-text-window display-5 d-block mb-2 opacity-25"></i>
+                        Yükleniyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mevcut kayıtlı değerler
+                              var mevcutDegerler = {
+            Baslik: '@Html.Raw(Model.Baslik?.Replace("'", "\\'") ?? "")',
+            AltBaslik: '@Html.Raw(Model.AltBaslik?.Replace("'", "\\'") ?? "")',
+            KampanyaNotu: '@Html.Raw(Model.KampanyaNotu?.Replace("'", "\\'") ?? "")',
+            Subheadline: '@Html.Raw(Model.Subheadline?.Replace("'", "\\'") ?? "")',
+            OriginalPrice: '@(Model.OriginalPrice.HasValue? Model.OriginalPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")',
+            DiscountedPrice: '@(Model.DiscountedPrice.HasValue? Model.DiscountedPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")',
+            BuyQuantityText: '@Html.Raw(Model.BuyQuantityText?.Replace("'", "\\'") ?? "")',
+            PayQuantityText: '@Html.Raw(Model.PayQuantityText?.Replace("'", "\\'") ?? "")',
+            Headline: '@Html.Raw(Model.Headline?.Replace("'", "\\'") ?? "")',
+            MinBasketText: '@Html.Raw(Model.MinBasketText?.Replace("'", "\\'") ?? "")',
+            DetailText: '@Html.Raw(Model.DetailText?.Replace("'", "\\'") ?? "")',
+            CampaignDescription: '@Html.Raw(Model.CampaignDescription?.Replace("'", "\\'") ?? "")',
+            IsLocalProduction: '@Model.IsLocalProduction',
+            OriginCountry: '@Html.Raw(Model.OriginCountry?.Replace("'", "\\'") ?? "")',
+            UnitPrice: '@Html.Raw(Model.UnitPrice?.Replace("'", "\\'") ?? "")',
+            PriceUpdateDate: '@Html.Raw(Model.PriceUpdateDate?.Replace("'", "\\'") ?? "")'
+        };
+
+               var alanEtiketleri = {
+            'Baslik': 'Başlık',
+            'AltBaslik': 'Alt Başlık',
+            'KampanyaNotu': 'Kampanya Notu',
+            'Subheadline': 'Ürün Alt Satır',
+            'OriginalPrice': 'Eski Fiyat (₺)',
+            'DiscountedPrice': 'Yeni Fiyat (₺)',
+            'BuyQuantityText': 'Alım Adedi Metni',
+            'PayQuantityText': 'Ödeme Adedi Metni',
+            'DateRange': 'Tarih Aralığı',
+            'Headline': 'Ürün Ana Satır',
+            'MinBasketText': 'Sepet Koşulu',
+            'DetailText': 'Ürün Detay Satırı',
+            'CampaignDescription': 'Kampanya Açıklaması',
+            'IsLocalProduction': 'Yerli Üretim',
+            'OriginCountry': 'Üretim Yeri',
+            'UnitPrice': 'Birim Fiyatı',
+            'PriceUpdateDate': 'Fiyat Değişiklik Tarihi'
+        };
+                var fiyatAlanlari = [];
+
+
+        function sablonSecildi(sablonId, mevcutDegerlerYukle) {
+            if (!sablonId) return;
+
+            fetch('/Campaign/GetTemplateFields?templateId=' + sablonId)
+                .then(r => r.json())
+                .then(data => {
+                            alanlariBuild(data.alanlar, mevcutDegerlerYukle, data.etiketler || {});
+                    onizlemeBuild(data);
+                    onizlemeGuncelle();
+                    tarihGuncelle();
+                });
+        }
+
+        function alanlariBuild(alanlar, mevcutDegerlerYukle, layoutEtiketleri) {
+                    var html = '';
+            alanlar.forEach(function (alan) {
+                         if (alan === 'DateRange') return;
+                            if (alan === 'IsLocalProduction') {
+            var checked = mevcutDegerler['IsLocalProduction'] === 'True' ? 'checked' : '';
+            html += `
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" name="IsLocalProduction" id="alan_IsLocalProduction"
+                               class="form-check-input" value="true" ${checked}
+                               onchange="onizlemeGuncelle()" />
+                        <label class="form-check-label" style="font-size:0.88rem;">Yerli Üretim</label>
+                    </div>
+                    <input type="hidden" name="IsLocalProduction" value="false" />
+                </div>`;
+            return;
+        }
+                        var etiket = (layoutEtiketleri && layoutEtiketleri[alan]) || alanEtiketleri[alan] || alan;
+                var tip = fiyatAlanlari.includes(alan) ? 'number' : 'text';
+                var deger = mevcutDegerlerYukle ? (mevcutDegerler[alan] || '') : '';
+                html += `
+                    <div class="mb-3">
+                        <label class="form-label fw-500" style="font-size:0.88rem;">${etiket}</label>
+                        <input type="${tip}" name="${alan}" id="alan_${alan}"
+                               class="form-control" style="border-radius:10px;"
+                               value="${deger}"
+                               oninput="onizlemeGuncelle()"
+                               ${tip === 'number' ? 'step="0.01" min="0"' : ''} />
+                    </div>`;
+            });
+            document.getElementById('dinamikAlanlar').innerHTML = html;
+        }
+
+                              function onizlemeBuild(data) {
+            if (!data.layoutJson) {
+                document.getElementById('onizlemeAlani').innerHTML =
+                    '<div class="text-center text-muted py-5">Layout tasarımı tanımlanmamış.</div>';
+                return;
+            }
+            var layoutJson = JSON.parse(data.layoutJson);
+            onizlemeBuildFromJson(layoutJson);
+        }
+
+        function onizlemeBuildFromJson(layoutJson) {
+            var w  = layoutJson.genislik  || 300;
+            var h  = layoutJson.yukseklik || 400;
+            var bg = layoutJson.arkaplan  || '#fff';
+
+            var inner = `<div style="width:${w}px; height:${h}px; background:${bg};
+                border:2px solid #e0e0e0; border-radius:8px; position:relative;
+                font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+                margin:0 auto; overflow:hidden;">`;
+
+            (layoutJson.alanlar || []).forEach(function(alan) {
+                var justify = alan.textAlign==='center'?'center':(alan.textAlign==='right'?'flex-end':'flex-start');
+
+                if (alan.ad === 'IsLocalProduction') {
+                    inner += `<div id="prev_${alan.ad}"
+                        style="position:absolute; left:${alan.x}px; top:${alan.y}px;
+                        width:${alan.width}px; height:${alan.height}px;
+                        display:none; align-items:center; justify-content:${justify};
+                        overflow:hidden; box-sizing:border-box;">
+                        <img src="/img/yerliuretimkirmizi.svg" style="width:100%; height:100%; object-fit:contain;" />
+                    </div>`;
+                } else {
+                            var efektSvg = '';
+        var ef = alan.efektler || {};
+        if (Object.values(ef).some(function(v){ return v===true; })) {
+            var renk = ef.renk || '#e63946';
+            var ek = ef.kalinlik || 2;
+            var pw = alan.width, ph = alan.height;
+            var cw = (ef.uzunluk && ef.uzunluk > 0) ? ef.uzunluk : pw;
+            var ch = (ef.yukseklik && ef.yukseklik > 0) ? ef.yukseklik : ph;
+            var ox = (pw - cw) / 2;
+            var oy = (ph - ch) / 2;
+            var lines = '';
+            if (ef.ust)      lines += '<line x1="0" y1="1" x2="' + pw + '" y2="1" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            if (ef.alt)      lines += '<line x1="0" y1="' + (ph-1) + '" x2="' + pw + '" y2="' + (ph-1) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            if (ef.sol)      lines += '<line x1="1" y1="0" x2="1" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            if (ef.sag)      lines += '<line x1="' + (pw-1) + '" y1="0" x2="' + (pw-1) + '" y2="' + ph + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            if (ef.carpraz1) lines += '<line x1="' + ox + '" y1="' + oy + '" x2="' + (ox+cw) + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            if (ef.carpraz2) lines += '<line x1="' + (ox+cw) + '" y1="' + oy + '" x2="' + ox + '" y2="' + (oy+ch) + '" stroke="' + renk + '" stroke-width="' + ek + '"/>';
+            efektSvg = '<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="' + pw + '" height="' + ph + '">' + lines + '</svg>';
+        }
+
+                            var fontFamilyStyle = alan.fontAilesi ? alan.fontAilesi : 'inherit';
+                            inner += `<div id="prev_${alan.ad}"
+                                style="position:absolute; left:${alan.x}px; top:${alan.y}px;
+                                width:${alan.width}px; height:${alan.height}px;
+                                font-size:${alan.fontSize}px; font-weight:${alan.fontWeight};
+                                color:${alan.color}; text-align:${alan.textAlign};
+                                font-family:${fontFamilyStyle};
+                                display:none; align-items:center; justify-content:${justify};
+                                overflow:hidden; box-sizing:border-box;">
+                                ${efektSvg}
+                                <span class="prev-metin" style="position:relative; z-index:1;"></span>
+                            </div>`;
+                }
+            });
+
+            (layoutJson.cizgiler || []).forEach(function(c) {
+                var svgIc = '';
+                if (c.yon==='yatay')         svgIc = `<line x1="0" y1="${c.height/2}" x2="${c.width}" y2="${c.height/2}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='dikey')    svgIc = `<line x1="${c.width/2}" y1="0" x2="${c.width/2}" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='carpraz1') svgIc = `<line x1="0" y1="0" x2="${c.width}" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+                else if (c.yon==='carpraz2') svgIc = `<line x1="${c.width}" y1="0" x2="0" y2="${c.height}" stroke="${c.renk}" stroke-width="${c.kalinlik}"/>`;
+
+                inner += `<div style="position:absolute; left:${c.x}px; top:${c.y}px;
+                    width:${c.width}px; height:${c.height}px; pointer-events:none;">
+                    <svg width="${c.width}" height="${c.height}">${svgIc}</svg>
+                </div>`;
+            });
+
+            inner += '</div>';
+            document.getElementById('onizlemeAlani').innerHTML = inner;
+        }
+
+        function onizlemeBuild_3al2ode() {
+            var html = `
+                <div style="width:300px; height:400px; background:#fff; border:2px solid #e0e0e0; border-radius:8px;
+                            display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+                            padding:24px 20px; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                            margin:0 auto; overflow:hidden;">
+                    <div style="text-align:center; width:100%;">
+                        <div id="prev_Baslik" style="display:none; font-size:2rem; font-weight:900; color:#e63946;
+                                                     text-transform:uppercase; line-height:1.1;"></div>
+                    </div>
+                    <div style="text-align:center; width:100%;">
+                        <div id="prev_AltBaslik" style="display:none; font-size:1rem; color:#222;"></div>
+                    </div>
+                    <div style="text-align:center; width:100%; flex:1; display:flex; flex-direction:column;
+                                align-items:center; justify-content:center;">
+                        <div id="prev_BuyQuantityText" style="display:none; font-size:2.2rem; font-weight:900;
+                                                               color:#e63946; text-transform:uppercase; line-height:1.2;"></div>
+                        <div id="prev_PayQuantityText" style="display:none; font-size:2.2rem; font-weight:900;
+                                                               color:#e63946; text-transform:uppercase; line-height:1.2;"></div>
+                    </div>
+                    <div style="text-align:center; width:100%;">
+                        <div id="prev_DiscountedPrice" style="display:none; font-size:1.6rem; font-weight:700; color:#16a34a;"></div>
+                        <div id="prev_OriginalPrice" style="display:none; font-size:0.9rem; color:#888; text-decoration:line-through;"></div>
+                    </div>
+                    <div style="text-align:center; width:100%;">
+                        <div id="prev_DateRange" style="display:none; font-size:0.85rem; color:#444;"></div>
+                    </div>
+                    <div style="text-align:center; width:100%;">
+                        <div id="prev_KampanyaNotu" style="display:none; font-size:0.72rem; color:#666; line-height:1.4;"></div>
+                    </div>
+                </div>`;
+            document.getElementById('onizlemeAlani').innerHTML = html;
+        }
+           function onizlemeBuild_tutar() {
+    var html = `
+        <div style="width:300px; height:400px; background:#fff; border:2px solid #e0e0e0; border-radius:8px;
+                    display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+                    padding:20px 16px; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+                    margin:0 auto; overflow:hidden; position:relative;">
+
+            <!-- Başlık -->
+            <div style="text-align:center; width:100%;">
+                <div id="prev_Baslik" style="display:none; font-size:1.3rem; font-weight:900; color:#111;
+                                             text-transform:uppercase; line-height:1.2;"></div>
+            </div>
+
+            <!-- Sepet Koşulu -->
+                    <div style="text-align:center; width:100%; margin-top:12px;">
+                <div id="prev_MinBasketText" style="display:none; font-size:0.85rem; font-weight:600; color:#e63946;"></div>
+            </div>
+
+            <!-- Ürün Ana Satır -->
+            <div style="text-align:center; width:100%;">
+                <div id="prev_Headline" style="display:none; font-size:1rem; font-weight:700; color:#111;"></div>
+            </div>
+
+            <!-- Ürün Alt Satır + Detay -->
+            <div style="text-align:center; width:100%;">
+                <div id="prev_Subheadline" style="display:none; font-size:0.82rem; color:#444;"></div>
+                <div id="prev_DetailText" style="display:none; font-size:0.82rem; color:#444;"></div>
+            </div>
+
+            <!-- Fiyatlar -->
+                   <!-- Fiyatlar -->
+        <div style="text-align:center; width:100%; flex:1; display:flex; flex-direction:column;
+                    align-items:center; justify-content:center; gap:8px;">
+            <div id="prev_OriginalPrice" style="display:none;"></div>
+            <div id="prev_DiscountedPrice" style="display:none; font-size:2.2rem; font-weight:900; color:#111;"></div>
+        </div>
+
+            <!-- Alt Bilgiler -->
+                            <div style="display:flex;width:100%;margin-top:8px;flex-direction: column;align-items: flex-end;align-content: center;">
+                        <!-- Orta: Tarih + Kampanya Açıklaması -->
+                        <div style="text-align:center; flex:1; margin-right:60px;">
+                    <div id="prev_DateRange" style="display:none; font-size:0.70rem; font-weight:700; color:#111;"></div>
+                    <div id="prev_CampaignDescription" style="display:none; font-size:0.70rem; font-weight:700; color:#111;"></div>
+                </div>
+                <!-- Sağ: Yerli Üretim + Bilgiler -->
+                <div style="text-align:right; min-width:90px;">
+                    <div id="prev_IsLocalProduction" style="display:none; margin-bottom:4px;">
+                        <img src="/img/yerliuretimkirmizi.svg" style="width:44px; height:auto;" />
+                    </div>
+                    <div id="prev_OriginCountry" style="display:none; font-size:0.45rem; color:#555;"></div>
+                    <div id="prev_UnitPrice" style="display:none; font-size:0.45rem; color:#555;"></div>
+                    <div id="prev_PriceUpdateDate" style="display:none; font-size:0.45rem; color:#555;"></div>
+                </div>
+            </div>
+
+        </div>`;
+    document.getElementById('onizlemeAlani').innerHTML = html;
+}
+        function onizlemeGuncelle() {
+            var alanlar = ['Baslik','AltBaslik','KampanyaNotu','Subheadline',
+                           'OriginalPrice','DiscountedPrice','BuyQuantityText','PayQuantityText',
+                           'Headline','MinBasketText','DetailText','CampaignDescription',
+                           'OriginCountry','UnitPrice','PriceUpdateDate'];
+
+            alanlar.forEach(function(alan) {
+                var input = document.getElementById('alan_' + alan);
+                var prev  = document.getElementById('prev_' + alan);
+                if (!input || !prev) return;
+                var deger = input.value.trim();
+                        var metin = prev.querySelector('.prev-metin') || prev;
+        if (deger) {
+            if (alan === 'OriginalPrice' || alan === 'DiscountedPrice') {
+                metin.textContent = '₺' + deger;
+            } else {
+                metin.textContent = deger;
+            }
+            prev.style.display = 'flex';
+        } else {
+            prev.style.display = 'none';
+        }
+            });
+
+            // IsLocalProduction
+            var localPrev  = document.getElementById('prev_IsLocalProduction');
+            var localInput = document.getElementById('alan_IsLocalProduction');
+            if (localPrev && localInput) {
+                localPrev.style.display = localInput.checked ? 'flex' : 'none';
+            }
+
+            // DateRange
+            var drInput = document.getElementById('alan_DateRange');
+            var drPrev  = document.getElementById('prev_DateRange');
+            if (drInput && drPrev) {
+                var metin = drPrev.querySelector('.prev-metin') || drPrev;
+                if (drInput.value.trim()) {
+                    metin.textContent    = drInput.value.trim();
+                    drPrev.style.display = 'flex';
+                } else {
+                    drPrev.style.display = 'none';
+                }
+            }
+        }
+
+                //      function tarihGuncelle() {
+                //     var bas = document.querySelector('[name="BaslangicTarihi"]').value;
+                //     var bit = document.querySelector('[name="BitisTarihi"]').value;
+                //     var dateRangeInput = document.getElementById('alan_DateRange');
+                //     var wrapper = document.getElementById('dateRangeWrapper');
+                //     if (!dateRangeInput) return;
+
+                //     if (bas && bit) {
+                //         var b = new Date(bas);
+                //         var e = new Date(bit);
+                //         var metin = '';
+                //         if (b.getMonth() === e.getMonth() && b.getFullYear() === e.getFullYear()) {
+                //             metin = b.getDate() + ' - ' + e.getDate() + ' ' + aylar[e.getMonth()] + ' ' + e.getFullYear();
+                //         } else {
+                //             metin = b.getDate() + ' ' + aylar[b.getMonth()] + ' - ' + e.getDate() + ' ' + aylar[e.getMonth()] + ' ' + e.getFullYear();
+                //         }
+                //         dateRangeInput.value = metin;
+                //         if (wrapper) wrapper.style.display = 'block';
+                //         onizlemeGuncelle();
+                //     }
+                // }
+                        function tarihGuncelle() {
+            var basInput = document.querySelector('[name="BaslangicTarihi"]');
+            var bitInput = document.querySelector('[name="BitisTarihi"]');
+            var bas = basInput.value;
+            var bit = bitInput.value;
+            var dateRangeInput = document.getElementById('alan_DateRange');
+            var wrapper = document.getElementById('dateRangeWrapper');
+
+            // Başlangıç seçilince bitiş minimum'u ayarla
+            if (bas) {
+                bitInput.min = bas;
+                // Eğer bitiş başlangıçtan küçükse sıfırla
+                if (bit && bit < bas) {
+                    bitInput.value = '';
+                    bit = '';
+                }
+            }
+
+            // Bitiş seçilince başlangıç maksimum'u ayarla
+            if (bit) {
+                basInput.max = bit;
+                if (bas && bas > bit) {
+                    basInput.value = '';
+                    bas = '';
+                }
+            }
+
+            if (!bas || !bit) {
+                if (dateRangeInput) dateRangeInput.value = '';
+                onizlemeGuncelle();
+                return;
+            }
+
+            var b = new Date(bas);
+            var e = new Date(bit);
+            var metin = '';
+            if (b.getMonth() === e.getMonth() && b.getFullYear() === e.getFullYear()) {
+                metin = b.getDate() + ' - ' + e.getDate() + ' ' + aylar[e.getMonth()] + ' ' + e.getFullYear();
+            } else {
+                metin = b.getDate() + ' ' + aylar[b.getMonth()] + ' - ' + e.getDate() + ' ' + aylar[e.getMonth()] + ' ' + e.getFullYear();
+            }
+
+            if (dateRangeInput) {
+                dateRangeInput.value = metin;
+                if (wrapper) wrapper.style.display = 'block';
+            }
+            onizlemeGuncelle();
+        }
+                 var aylar = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+                             'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+                // IsLocalProduction ayrıca handle et
+                var localPrev = document.getElementById('prev_IsLocalProduction');
+                var localInput = document.getElementById('alan_IsLocalProduction');
+                if (localPrev && localInput) {
+                    if (localInput.checked) {
+                        localPrev.style.display = 'block';
+                    } else {
+                        localPrev.style.display = 'none';
+                    }
+                }
+                                // DateRange ayrıca güncelle
+                    var drInput = document.getElementById('alan_DateRange');
+                    var drPrev = document.getElementById('prev_DateRange');
+                    if (drInput && drPrev) {
+                        if (drInput.value.trim()) {
+                            drPrev.textContent = drInput.value.trim();
+                            drPrev.style.display = 'block';
+                        } else {
+                            drPrev.style.display = 'none';
+                        }
+                    }
+                            
+               
+                 
+
+        // Sayfa açılınca mevcut şablonu yükle
+        window.addEventListener('load', function () {
+            var sablonId = document.getElementById('sablonSelect').value;
+            if (sablonId) {
+                sablonSecildi(sablonId, true); // true = mevcut değerleri yükle
+            }
+                tarihGuncelle(); // ← bunu ekle
+        });
+
+                  document.getElementById('kampanyaForm').addEventListener('submit', function(e) {
+                            var secili = document.querySelectorAll('.store-check:checked').length;
+                            if (secili === 0) {
+                                e.preventDefault();
+                                e.stopImmediatePropagation();
+                                document.getElementById('storeHata').style.display = 'block';
+                                return;
+                            }
+                            document.getElementById('storeHata').style.display = 'none';
+
+                            var fiyatlar = ['OriginalPrice', 'DiscountedPrice'];
+                            fiyatlar.forEach(function(alan) {
+                                var input = document.getElementById('alan_' + alan);
+                                if (input) {
+                                    input.value = input.value.replace(',', '.');
+                                }
+                            });
+                        }, true);
+    </script>
+}

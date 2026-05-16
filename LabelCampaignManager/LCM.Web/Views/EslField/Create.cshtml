@@ -1,0 +1,37 @@
+﻿@model LCM.Domain.Entities.EslField
+@{
+    ViewData["Title"] = "ESL Alan Ekle";
+}
+
+<h4>Yeni ESL Alanı</h4>
+<hr />
+
+<form asp-action="Create" method="post" style="max-width:500px">
+    <div class="mb-3">
+        <label class="form-label">Değişken Adı <span class="text-danger">*</span></label>
+        <input asp-for="VariableName" class="form-control" placeholder="sku, itemName, price1..." />
+        <span asp-validation-for="VariableName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Veri Tipi <span class="text-danger">*</span></label>
+        <select asp-for="DataType" class="form-select">
+            <option value="">-- Seçiniz --</option>
+            <option value="varchar">varchar</option>
+            <option value="decimal">decimal</option>
+            <option value="int">int</option>
+            <option value="boolean">boolean</option>
+            <option value="datetime">datetime</option>
+        </select>
+        <span asp-validation-for="DataType" class="text-danger"></span>
+    </div>
+    <div class="mb-3 form-check">
+        <input asp-for="IsRequired" class="form-check-input" type="checkbox" />
+        <label class="form-check-label">Zorunlu Alan</label>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Açıklama</label>
+        <input asp-for="Aciklama" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">İptal</a>
+</form>

@@ -1,0 +1,66 @@
+﻿@model List<LCM.Domain.Entities.EslField>
+@{
+    ViewData["Title"] = "ESL Alan Tanımları";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">ESL Alan Tanımları</h4>
+    <a asp-action="Create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Yeni Alan Ekle
+    </a>
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success">@TempData["Basari"]</div>
+}
+@if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger">@TempData["Hata"]</div>
+}
+
+<table class="table table-bordered table-hover table-sm">
+    <thead style="background-color: #0d6efd; color: white;">
+        <tr>
+            <th>Değişken Adı</th>
+            <th>Veri Tipi</th>
+            <th>Zorunlu</th>
+            <th>Açıklama</th>
+            <th style="width:120px"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var alan in Model)
+        {
+            <tr>
+                <td><code style="color: #0d6efd;">@alan.VariableName</code></td>
+                <td>
+                    <span class="badge"
+                          style="background-color: @(alan.DataType == "decimal" ? "#0d6efd" : alan.DataType == "int" ? "#0a58ca" : "#6ea8fe"); color:white;">
+                        @alan.DataType
+                    </span>
+                </td>
+                <td>
+                    @if (alan.IsRequired)
+                    {
+                        <span class="badge bg-danger">Zorunlu</span>
+                    }
+                    else
+                    {
+                        <span class="badge" style="background-color:#e7f1ff; color:#0d6efd;">Opsiyonel</span>
+                    }
+                </td>
+                <td>@alan.Aciklama</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@alan.Id"
+                       class="btn btn-sm" style="background-color:#0d6efd; color:white;">Düzenle</a>
+                    <form asp-action="Delete" asp-route-id="@alan.Id"
+                          method="post" style="display:inline"
+                          onsubmit="return confirm('Silinsin mi?')">
+                        <button class="btn btn-danger btn-sm">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

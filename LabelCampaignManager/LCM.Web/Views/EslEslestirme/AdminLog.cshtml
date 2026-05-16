@@ -1,0 +1,151 @@
+﻿@model List<LCM.Domain.Entities.EslEslestirme>
+@{
+    ViewData["Title"] = "ESL Eşleştirme Logları";
+}
+
+<div class="container-fluid px-3 py-4">
+    <h5 class="fw-bold mb-4">ESL Eşleştirme Logları</h5>
+
+    <div class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="text" id="filterKullanici" class="form-control"
+                   placeholder="Kullanıcı ara..." style="border-radius:10px;"
+                   oninput="filtrele()" />
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="filterStore" class="form-control"
+                   placeholder="Store ara..." style="border-radius:10px;"
+                   oninput="filtrele()" />
+        </div>
+        <div class="col-md-3">
+            <input type="date" id="filterTarih" class="form-control"
+                   style="border-radius:10px;" oninput="filtrele()" />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Henüz eşleştirme kaydı yok.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="logTablosu">
+                <thead class="table-light">
+                    <tr>
+                        <th>Kullanıcı</th>
+                        <th>ESL Barkod</th>
+                        <th>Kampanya</th>
+                        <th>SKU</th>
+                        <th>Store</th>
+                        <th>Mod</th>
+                        <th>Durum</th>
+                        <th>Tarih</th>
+                        <th>JSON</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr>
+                            <td>@e.Kullanici.Ad @e.Kullanici.Soyad</td>
+                            <td><code>@e.EslBarkod</code></td>
+                            <td>@e.Kampanya.Baslik</td>
+                            <td>@e.Kampanya.Sku</td>
+                            <td>@e.Store.StoreName</td>
+                            <td>@e.IslemTipi</td>
+                            <td>
+                                @if (e.BasariliMi)
+                                {
+                                    <span class="badge bg-success">Başarılı</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Hatalı</span>
+                                }
+                            </td>
+                            <td>@e.EslestirmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(e.GonderilenJson))
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            style="border-radius:8px;"
+                                            onclick="jsonGoster(this)"
+                                            data-json="@e.GonderilenJson">
+                                        <i class="bi bi-braces"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div id="jsonModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+     background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:24px; max-width:500px; width:90%;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">Gönderilen JSON</h6>
+            <button class="btn btn-sm btn-light" style="border-radius:8px;" onclick="jsonKapat()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <pre id="jsonIcerik" style="background:#f8f9fa; border-radius:10px; padding:16px;
+             font-size:0.82rem; max-height:300px; overflow-y:auto; white-space:pre-wrap;"></pre>
+        <button class="btn btn-outline-primary w-100 mt-2" style="border-radius:10px;"
+                onclick="jsonKopyala()">
+            <i class="bi bi-clipboard me-1"></i>Kopyala
+        </button>
+    </div>
+</div>
+
+<script>
+    function filtrele() {
+        var kullanici = document.getElementById('filterKullanici').value.toLowerCase();
+        var store = document.getElementById('filterStore').value.toLowerCase();
+        var tarih = document.getElementById('filterTarih').value;
+
+        document.querySelectorAll('#logTablosu tbody tr').forEach(tr => {
+            var k = tr.cells[0].innerText.toLowerCase();
+            var s = tr.cells[4].innerText.toLowerCase();
+            var t = tr.cells[7].innerText;
+
+            var goster = k.includes(kullanici) && s.includes(store);
+            if (tarih) goster = goster && t.startsWith(tarih.split('-').reverse().join('.'));
+            tr.style.display = goster ? '' : 'none';
+        });
+    }
+
+       function jsonGoster(btn) {
+        var json = btn.getAttribute('data-json');
+        try {
+            var parsed = JSON.parse(json);
+            document.getElementById('jsonIcerik').innerText = JSON.stringify(parsed, null, 2);
+        } catch(e) {
+            document.getElementById('jsonIcerik').innerText = json;
+        }
+        document.getElementById('jsonModal').style.display = 'flex';
+    }
+
+    function jsonKapat() {
+        document.getElementById('jsonModal').style.display = 'none';
+    }
+
+        function jsonKopyala() {
+        var metin = document.getElementById('jsonIcerik').innerText;
+        navigator.clipboard.writeText(metin).then(function() {
+            var btn = document.querySelector('#jsonModal .btn-outline-primary');
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Kopyalandı!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            setTimeout(function() {
+                btn.innerHTML = '<i class="bi bi-clipboard me-1"></i>Kopyala';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        });
+    }
+</script>

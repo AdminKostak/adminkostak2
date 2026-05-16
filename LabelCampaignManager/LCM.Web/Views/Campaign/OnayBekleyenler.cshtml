@@ -1,0 +1,200 @@
+﻿@model IEnumerable<LCM.Domain.Entities.Campaign>
+@{
+    ViewData["Title"] = "Onay Bekleyen Kampanyalar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Onay Bekleyen Kampanyalar</h5>
+        <p class="text-muted mb-0" style="font-size:0.88rem;">
+            Onayınızı bekleyen @Model.Count() kampanya var
+        </p>
+    </div>
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" style="border-radius:10px;">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Basari"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm" style="border-radius:14px;">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-check2-all display-4 text-success opacity-50 d-block mb-3"></i>
+            <p class="text-muted">Onay bekleyen kampanya bulunmuyor.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var k in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:14px;">
+                    <div class="card-body p-4">
+
+                        <!-- Başlık -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">@(k.Baslik ?? "—")</h6>
+                                <div style="font-size:0.78rem; color:#888;">SKU: @k.Sku</div>
+                            </div>
+                            <span class="badge rounded-pill px-2 py-1"
+                                  style="background:#eff6ff; color:#2563eb; font-size:0.75rem;">
+                                <i class="bi bi-clock me-1"></i>Onay Bekliyor
+                            </span>
+                        </div>
+
+                        <!-- Bilgiler -->
+                        <div class="mb-3" style="font-size:0.84rem;">
+                            <div class="d-flex justify-content-between py-1"
+                                 style="border-bottom:1px solid #f0f0f0;">
+                                <span class="text-muted">Şablon</span>
+                                <span class="fw-500">@k.Sablon?.SablonAdi</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1"
+                                 style="border-bottom:1px solid #f0f0f0;">
+                                <span class="text-muted">Ekleyen</span>
+                                <span>@k.EkleyenKullanici?.Ad @k.EkleyenKullanici?.Soyad</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1"
+                                 style="border-bottom:1px solid #f0f0f0;">
+                                <span class="text-muted">Tarih</span>
+                                <span>@k.BaslangicTarihi.ToString("dd.MM.yyyy") - @k.BitisTarihi.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            @if (k.DiscountedPrice.HasValue)
+                            {
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Fiyat</span>
+                                    <span class="fw-bold text-success">₺@k.DiscountedPrice.Value.ToString("N2")</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Butonlar -->
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="/Campaign/Detail/@k.Id"
+                                   class="btn btn-sm btn-light flex-fill" style="border-radius:8px;">
+                                <i class="bi bi-eye me-1"></i>İncele
+                            </a>
+                            <button class="btn btn-sm btn-success flex-fill"
+                                    style="border-radius:8px;"
+                                    onclick="onaylaModal(@k.Id, '@Html.Raw(k.Baslik?.Replace("'", "\\'") ?? "")' )">
+                                <i class="bi bi-check-lg me-1"></i>Onayla
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    style="border-radius:8px;"
+                                    onclick="yorumModal(@k.Id, 'reddet', '@Html.Raw(k.Baslik?.Replace("'", "\\'") ?? "")' )">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning"
+                                    style="border-radius:8px;"
+                                    onclick="yorumModal(@k.Id, 'revize', '@Html.Raw(k.Baslik?.Replace("'", "\\'") ?? "")' )">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Onayla Modal -->
+<div class="modal fade" id="onayModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; border:0;">
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-check-circle display-4 text-success d-block mb-3"></i>
+                <h5 class="fw-bold mb-2">Kampanyayı Onayla</h5>
+                <p class="text-muted mb-4" id="onayModalBaslik" style="font-size:0.9rem;"></p>
+                <form id="onayForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="submit" class="btn btn-success px-4" style="border-radius:10px;">
+                            <i class="bi bi-check-lg me-1"></i>Evet, Onayla
+                        </button>
+                        <button type="button" class="btn btn-light px-4"
+                                style="border-radius:10px;" data-bs-dismiss="modal">
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reddet / Revize Modal -->
+<div class="modal fade" id="yorumModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; border:0;">
+            <div class="modal-body p-4">
+                <h5 class="fw-bold mb-1" id="yorumModalBaslik"></h5>
+                <p class="text-muted mb-3" id="yorumModalAlt" style="font-size:0.88rem;"></p>
+                <form id="yorumForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.88rem;">
+                            Yorum <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="yorumInput" name="yorum" class="form-control" rows="3"
+                                  style="border-radius:10px;"
+                                  placeholder="Açıklama yazın..."></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" id="yorumSubmitBtn"
+                                class="btn px-4" style="border-radius:10px;">
+                            Gönder
+                        </button>
+                        <button type="button" class="btn btn-light px-4"
+                                style="border-radius:10px;" data-bs-dismiss="modal">
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function onaylaModal(id, baslik) {
+            document.getElementById('onayModalBaslik').textContent =
+                '"' + baslik + '" kampanyasını onaylamak istediğinize emin misiniz?';
+            document.getElementById('onayForm').action = '/Campaign/Onayla/' + id;
+            new bootstrap.Modal(document.getElementById('onayModal')).show();
+        }
+
+        function yorumModal(id, tip, baslik) {
+            var form   = document.getElementById('yorumForm');
+            var baslikEl = document.getElementById('yorumModalBaslik');
+            var altEl    = document.getElementById('yorumModalAlt');
+            var btn      = document.getElementById('yorumSubmitBtn');
+
+            document.getElementById('yorumInput').value = '';
+
+            if (tip === 'reddet') {
+                baslikEl.textContent = 'Kampanyayı Reddet';
+                altEl.textContent    = '"' + baslik + '" kampanyası reddedilecek.';
+                btn.className        = 'btn btn-danger px-4';
+                btn.textContent      = 'Reddet';
+                form.action          = '/Campaign/Reddet/' + id;
+            } else {
+                baslikEl.textContent = 'Revize İste';
+                altEl.textContent    = '"' + baslik + '" için revize talep edilecek.';
+                btn.className        = 'btn btn-warning px-4';
+                btn.textContent      = 'Revize İste';
+                form.action          = '/Campaign/RevizeIste/' + id;
+            }
+
+            new bootstrap.Modal(document.getElementById('yorumModal')).show();
+        }
+    </script>
+}

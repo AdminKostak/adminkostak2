@@ -1,0 +1,70 @@
+﻿@model LCM.Web.Auth.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LCM — Giriş</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>LabelCampaign Manager</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Login" method="post">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="All" class="text-danger mb-2"></div>
+                            <div class="mb-3">
+                                <label asp-for="KullaniciAdi" class="form-label">Kullanıcı Adı</label>
+                                <input asp-for="KullaniciAdi" class="form-control" placeholder="Kullanıcı adınız" />
+                                <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Sifre" class="form-label">Şifre</label>
+                                <input asp-for="Sifre" class="form-control" placeholder="Şifreniz" />
+                                <span asp-validation-for="Sifre" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input asp-for="BeniHatirla" class="form-check-input" />
+                                <label asp-for="BeniHatirla" class="form-check-label">Beni Hatırla</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loginOverlay" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.8); z-index:9999;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:2rem 3rem; box-shadow:0 8px 32px rgba(0,0,0,0.15); text-align:center;">
+            <div style="width:44px; height:44px; border:3px solid #e0e7ff; border-top:3px solid #2563eb; border-radius:50%; animation:lcmSpin 0.8s linear infinite; margin:0 auto 1rem;"></div>
+            <div style="font-size:0.95rem; font-weight:600; color:#111;">Giriş yapılıyor...</div>
+            <div style="font-size:0.82rem; color:#888; margin-top:0.3rem;">Lütfen bekleyin</div>
+        </div>
+
+    </div>
+
+    <style>
+        @@keyframes lcmSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            document.getElementById('loginOverlay').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

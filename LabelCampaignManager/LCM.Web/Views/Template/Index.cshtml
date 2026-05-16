@@ -1,0 +1,106 @@
+﻿@model List<LCM.Domain.Entities.Template>
+@{
+    ViewData["Title"] = "Şablonlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Şablonlar</h5>
+        <small class="text-muted">Kampanya şablonlarını yönet</small>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("KampanyaYonetici"))
+    {
+        <a href="/Template/Create" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i>Yeni Şablon
+        </a>
+    }
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Basari"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle me-2"></i>@TempData["Hata"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:16px; overflow:hidden;">
+
+                <!-- Fotoğraf alanı -->
+                <div style="background:#f8fafc; display:flex; align-items:center; justify-content:center; height:200px; padding:12px;">
+                    @if (!string.IsNullOrEmpty(item.SablonFotoYolu))
+                    {
+                        <img src="@item.SablonFotoYolu" alt="@item.SablonAdi"
+                             style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-image text-muted" style="font-size:2.5rem;"></i>
+                    }
+                </div>
+
+                <!-- Bilgi alanı -->
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <h6 class="fw-bold mb-0" style="font-size:0.95rem;">@item.SablonAdi</h6>
+                        <span class="badge rounded-pill px-2 py-1"
+                              style="background:#eff6ff; color:#2563eb; font-size:0.72rem;">
+                            @item.EtiketTip?.EtiketTipi
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Aciklama))
+                    {
+                        <p class="text-muted mb-2" style="font-size:0.82rem;">@item.Aciklama</p>
+                    }
+                    <div class="text-muted mb-3" style="font-size:0.75rem;">
+                        <i class="bi bi-person me-1"></i>@item.EkleyenKullanici?.Ad @item.EkleyenKullanici?.Soyad
+                        <span class="ms-2">
+                            <i class="bi bi-calendar3 me-1"></i>@item.OlusturmaTarihi.ToString("dd.MM.yyyy")
+                        </span>
+                    </div>
+                    @if (User.IsInRole("Admin") || User.IsInRole("KampanyaYonetici"))
+                    {
+                        <div class="d-flex gap-2">
+                            <a href="/Template/Edit/@item.Id"
+                               class="btn btn-sm btn-outline-primary"
+                               style="border-radius:8px; flex:1;">
+                                <i class="bi bi-pencil me-1"></i>Düzenle
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <form method="post" action="/Template/Delete/@item.Id"
+                                      data-noloading="true">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button"
+                                            onclick="openConfirm(this.closest('form'))"
+                                            class="btn btn-sm btn-outline-danger"
+                                            style="border-radius:8px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center text-muted py-5">
+            <i class="bi bi-layout-text-window display-6 d-block mb-2"></i>
+            Henüz şablon eklenmemiş.
+        </div>
+    }
+</div>

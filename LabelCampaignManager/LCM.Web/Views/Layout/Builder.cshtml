@@ -1,0 +1,938 @@
+﻿@{
+    ViewData["Title"] = "Layout Tasarla";
+    var layoutId = (int)ViewBag.LayoutId;
+    var layoutJson = ViewBag.LayoutJson as string ?? "";
+    var fontListesi = ViewBag.FontListesi as List<string> ?? new List<string>();
+}
+<div class="d-flex gap-3" style="height:calc(100vh - 120px);">
+
+    <!-- SOL: Araç Paneli -->
+    <div class="card border-0 shadow-sm" style="width:260px; min-width:260px; border-radius:14px; overflow-y:auto;">
+        <div class="card-body p-3">
+            <!-- Snap to grid toggle -->
+            <div class="d-flex align-items-center gap-2 mt-3">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="snapToggle" checked>
+                    <label class="form-check-label" style="font-size:0.82rem;" for="snapToggle">
+                        Grida Yapış (8px)
+                    </label>
+                </div>
+            </div>
+            <h6 class="fw-bold mb-2">Alanlar</h6>
+            <p class="text-muted mb-2" style="font-size:0.78rem;">Tıkla, kanvasa ekle</p>
+            <div class="d-flex flex-column gap-1" id="alanListesi">
+                @foreach (var alan in new[] {
+                    "Baslik","AltBaslik","KampanyaNotu","Subheadline","Headline",
+                    "OriginalPrice","DiscountedPrice","BuyQuantityText","PayQuantityText",
+                    "DateRange","MinBasketText","DetailText","CampaignDescription",
+                    "IsLocalProduction","OriginCountry","UnitPrice","PriceUpdateDate"
+                })
+                {
+                    <button class="btn btn-outline-secondary btn-sm text-start"
+                            style="border-radius:8px; font-size:0.80rem;"
+                            onclick="alanEkle('@alan')">
+                        <i class="bi bi-plus-circle me-1"></i>@alan
+                    </button>
+                }
+            </div>
+
+            <hr class="my-3" />
+            <button class="btn btn-outline-primary btn-sm text-start mt-1"
+                    style="border-radius:8px; font-size:0.80rem;"
+                    onclick="cizgiEkle()">
+                <i class="bi bi-slash-lg me-1"></i>Çizgi Ekle
+            </button>
+            <div class="mb-2">
+                <label style="font-size:0.78rem;">Kanvas Font Ailesi</label>
+                <select id="kanvasFontAilesi" class="form-select form-select-sm" style="border-radius:8px;">
+                    <option value="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">Sistem (varsayılan)</option>
+                    @foreach (var font in fontListesi)
+                    {
+                        <option value="'@font'" style="font-family:'@font'">@font</option>
+                    }
+                </select>
+            </div>
+            <h6 class="fw-bold mb-2 mt-3">Kanvas</h6>
+            <div class="mb-2">
+                <label style="font-size:0.78rem;">Kampanya Formu Etiketi</label>
+                <input type="text" id="propEtiket" class="form-control form-control-sm"
+                       placeholder="örn: Ürün Adı" style="border-radius:8px;" />
+            </div>
+            <div class="mb-2">
+                <label style="font-size:0.78rem;">Genişlik (px)</label>
+                <input type="number" id="kanvasGenislik" class="form-control form-control-sm"
+                       value="300" style="border-radius:8px;" />
+            </div>
+            <div class="mb-2">
+                <label style="font-size:0.78rem;">Yükseklik (px)</label>
+                <input type="number" id="kanvasYukseklik" class="form-control form-control-sm"
+                       value="400" style="border-radius:8px;" />
+            </div>
+            <div class="mb-3">
+                <label style="font-size:0.78rem;">Arkaplan</label>
+                <input type="color" id="kanvasArkaplan" class="form-control form-control-sm"
+                       value="#ffffff" style="border-radius:8px; height:36px;" />
+            </div>
+
+            <hr class="my-3" />
+            <div id="seciliAlanPanel" style="display:none;">
+                <h6 class="fw-bold mb-2">Seçili Alan</h6>
+                <div id="normalAlanProps">
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Font Ailesi</label>
+                        <select id="propFontAilesi" class="form-select form-select-sm" style="border-radius:8px;">
+                            <option value="">Kanvas Varsayılanı</option>
+                            @foreach (var font in fontListesi)
+                            {
+                                <option value="'@font'">@font</option>
+                            }
+                        </select> 
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Font Boyutu</label>
+                        <input type="number" id="propFontSize" class="form-control form-control-sm"
+                               value="16" style="border-radius:8px;" />
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Font Kalınlığı</label>
+                        <select id="propFontWeight" class="form-select form-select-sm" style="border-radius:8px;">
+                            <option value="400">Normal</option>
+                            <option value="700">Kalın</option>
+                            <option value="900">Çok Kalın</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Renk</label>
+                        <input type="color" id="propColor" class="form-control form-control-sm"
+                               value="#111111" style="border-radius:8px; height:36px;" />
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Hizalama</label>
+                        <select id="propAlign" class="form-select form-select-sm" style="border-radius:8px;">
+                            <option value="left">Sol</option>
+                            <option value="center">Orta</option>
+                            <option value="right">Sağ</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Genişlik</label>
+                        <input type="number" id="propWidth" class="form-control form-control-sm" style="border-radius:8px;" />
+                    </div>
+                    <div class="mb-3">
+                        <label style="font-size:0.78rem;">Yükseklik</label>
+                        <input type="number" id="propHeight" class="form-control form-control-sm" style="border-radius:8px;" />
+                    </div>
+                </div>
+
+                <!-- Çizgi özellikleri -->
+                <div id="cizgiProps" style="display:none;">
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Çizgi Rengi</label>
+                        <input type="color" id="propCizgiRenk" class="form-control form-control-sm"
+                               value="#111111" style="border-radius:8px; height:36px;" />
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Kalınlık (px)</label>
+                        <input type="number" id="propCizgiKalinlik" class="form-control form-control-sm"
+                               value="2" min="1" max="20" style="border-radius:8px;" />
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Uzunluk (px)</label>
+                        <input type="number" id="propCizgiUzunluk" class="form-control form-control-sm" style="border-radius:8px;" />
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size:0.78rem;">Yön</label>
+                        <select id="propCizgiYon" class="form-select form-select-sm" style="border-radius:8px;">
+                            <option value="yatay">Yatay</option>
+                            <option value="dikey">Dikey</option>
+                            <option value="carpraz1">Çapraz ↘</option>
+                            <option value="carpraz2">Ters Çapraz ↙</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Fiyat efektleri -->
+                <div id="fiyatCizgiPanel" style="display:none;">
+                    <div class="mt-1">
+                        <label style="font-size:0.78rem;">Çizgi Kalınlığı (px)</label>
+                        <input type="number" id="efektKalinlik" class="form-control form-control-sm"
+                               value="2" min="1" max="10" style="border-radius:8px;" />
+                    </div>
+                    <div class="mt-1">
+                        <label style="font-size:0.78rem;">Çizgi Uzunluğu (px)</label>
+                        <input type="number" id="efektUzunluk" class="form-control form-control-sm"
+                               value="0" min="0" style="border-radius:8px;" />
+                        <small class="text-muted" style="font-size:0.72rem;">0 = yazı genişliği</small>
+                    </div>
+                    <div class="mt-1">
+                        <label style="font-size:0.78rem;">Çizgi Yüksekliği (px)</label>
+                        <input type="number" id="efektYukseklik" class="form-control form-control-sm"
+                               value="0" min="0" style="border-radius:8px;" />
+                        <small class="text-muted" style="font-size:0.72rem;">0 = yazı yüksekliği</small>
+                    </div>
+                    <hr class="my-2" />
+                    <label style="font-size:0.78rem; font-weight:600;">Çizgi Efektleri</label>
+                    <div class="d-flex flex-column gap-1 mt-1">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektUst">
+                            <label class="form-check-label" style="font-size:0.78rem;">Üst çizgi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektAlt">
+                            <label class="form-check-label" style="font-size:0.78rem;">Alt çizgi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektSol">
+                            <label class="form-check-label" style="font-size:0.78rem;">Sol çizgi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektSag">
+                            <label class="form-check-label" style="font-size:0.78rem;">Sağ çizgi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektCarpraz1">
+                            <label class="form-check-label" style="font-size:0.78rem;">Çapraz ↘</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="efektCarpraz2">
+                            <label class="form-check-label" style="font-size:0.78rem;">Ters Çapraz ↙</label>
+                        </div>
+                        <div class="mt-1">
+                            <label style="font-size:0.78rem;">Efekt Rengi</label>
+                            <input type="color" id="efektRenk" class="form-control form-control-sm"
+                                   value="#e63946" style="border-radius:8px; height:30px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-danger btn-sm w-100 mt-2" style="border-radius:8px;" onclick="seciliSil()">
+                    <i class="bi bi-trash me-1"></i>Alanı Sil
+                </button>
+               
+            </div>
+        </div>
+    </div>
+
+    <!-- ORTA: Kanvas -->
+    <div class="card border-0 shadow-sm flex-fill" style="border-radius:14px; overflow:hidden;">
+        <div class="card-body p-4 d-flex flex-column align-items-center">
+            <div class="d-flex justify-content-between w-100 mb-3">
+                <h6 class="fw-bold mb-0">@ViewBag.LayoutAd</h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success px-4" style="border-radius:10px;" onclick="kaydet()">
+                        <i class="bi bi-check-lg me-1"></i>Kaydet
+                    </button>
+                    <a href="/Layout/Index" class="btn btn-light px-3" style="border-radius:10px;">İptal</a>
+                </div>
+            </div>
+            <div id="kanvas" style="position:relative; background:#fff;
+                border:2px dashed #cbd5e1; border-radius:8px;
+                width:300px; height:400px; overflow:visible; clip-path:none;">
+            </div>
+        </div>
+        
+    </div>
+    </div>
+    
+
+@section Scripts {
+    <script>
+        // ─── TEMEL DEĞİŞKENLER ───────────────────────────────────────────────────────
+        var layoutId    = @layoutId;
+        var seciliEl    = null;
+        var isDragging  = false;
+        var dragOffsetX = 0, dragOffsetY = 0;
+        var fiyatAlanlari = ['OriginalPrice', 'DiscountedPrice'];
+                // ─── SNAP TO GRID ────────────────────────────────────────────────────────────
+        var GRID = 8;
+        function snap(val) {
+            var aktif = document.getElementById('snapToggle');
+            if (!aktif || !aktif.checked) return Math.round(val);
+            return Math.round(val / GRID) * GRID;
+        }
+
+        // ─── RESIZE ──────────────────────────────────────────────────────────────────
+        var isResizing    = false;
+        var resizeDir     = '';   // 'n','s','e','w','ne','nw','se','sw'
+        var resizeStartX  = 0, resizeStartY  = 0;
+        var resizeStartL  = 0, resizeStartT  = 0;
+        var resizeStartW  = 0, resizeStartH  = 0;
+        var HANDLE_SIZE   = 8;   // px
+
+        // ─── GEÇMİŞ (CTRL+Z) ────────────────────────────────────────────────────────
+        // Her eylem ÖNCE snapshot alır, SONRA değişikliği yapar.
+        // Böylece Ctrl+Z her zaman bir önceki duruma döner.
+        var gecmis    = [];
+        var gecmisMax = 50;
+
+        function snapshotAl() {
+            // Bekleyen throttle timer varsa iptal et, anında kaydet
+            var kanvas = document.getElementById('kanvas');
+            var snap = kanvas.innerHTML;
+            // Aynı snapshot'ı tekrar ekleme
+            if (gecmis.length > 0 && gecmis[gecmis.length - 1] === snap) return;
+            gecmis.push(snap);
+            if (gecmis.length > gecmisMax) gecmis.shift();
+        }
+
+        function geriAl() {
+            if (gecmis.length === 0) return;
+            var kanvas = document.getElementById('kanvas');
+            kanvas.innerHTML = gecmis.pop();
+
+                // Font CSS'leri yeniden yükle
+        var linkler = document.querySelectorAll('link[href="/Font/FontCss"]');
+        linkler.forEach(function(l) {
+            var yeni = l.cloneNode();
+            yeni.href = '/Font/FontCss?t=' + Date.now();
+            l.parentNode.replaceChild(yeni, l);
+        });
+
+            if (seciliEl) handleKaldir(seciliEl);
+            // State sıfırla
+            seciliEl   = null;
+            isDragging = false;
+            window._tasimaBasladi = false;
+            window._okBasildi     = false;
+
+            document.getElementById('seciliAlanPanel').style.display = 'none';
+
+            // Geri yüklenen elementlere event listener bağla
+            kanvas.querySelectorAll('[data-tip="alan"],[data-tip="cizgi"]').forEach(function(el) {
+                baglaMousedown(el);
+            });
+        }
+
+        // ─── SAMPLE ETİKETLER ────────────────────────────────────────────────────────
+        var alanEtiketleri = {
+            'Baslik':'HAFTANIN FIRSATI', 'AltBaslik':'Makarna Çeşitlerinde', 'KampanyaNotu':'Kampanya Notu',
+            'Subheadline':'Antep Fıstıklı', 'OriginalPrice':'₺149,90', 'DiscountedPrice':'₺99,90',
+            'BuyQuantityText':'3 AL', 'PayQuantityText':'2 ÖDE', 'DateRange':'1-15 Nisan',
+            'Headline':'Nestle Damak', 'MinBasketText':'₺100 ve Üzeri', 'DetailText':'Sütlü Çikolata',
+            'CampaignDescription':'Fiyatlarımıza KDV dâhildir.', 'IsLocalProduction':'[Yerli Üretim]',
+            'OriginCountry':'Üretim Yeri: Türkiye', 'UnitPrice':'Birim Fiyatı: ₺1052 / kg',
+            'PriceUpdateDate':'Fiyat Değişiklik Tarihi: 4.03.2026'
+        };
+
+        var mevcutJson = @Html.Raw(string.IsNullOrEmpty(layoutJson) ? "null" : layoutJson);
+
+        // ─── DOM HAZIR ───────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Kanvas boyut/renk inputları — değişince kanvası güncelle (history YOK, yapısal değil)
+            ['kanvasGenislik','kanvasYukseklik','kanvasArkaplan','kanvasFontAilesi'].forEach(function (id) {
+                var el = document.getElementById(id);
+                el.addEventListener('input',  kanvasGuncelle);
+                el.addEventListener('change', kanvasGuncelle);
+            });
+
+            // Prop inputları — her değişiklik ÖNCE snapshot, SONRA uygula
+                          [
+         'propFontSize','propFontWeight','propColor','propAlign',
+         'propWidth','propHeight','propCizgiRenk','propCizgiKalinlik',
+         'propCizgiYon','propCizgiUzunluk','propEtiket','propFontAilesi'
+        ].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+
+            el.addEventListener('focus', function () { snapshotAl(); });
+            el.addEventListener('input', propGuncelle);
+            el.addEventListener('change', propGuncelle);
+        });
+
+            // Fiyat efekt checkboxları
+            ['efektUst','efektKalinlik','efektAlt','efektSol','efektSag',
+             'efektCarpraz1','efektCarpraz2','efektRenk','efektUzunluk','efektYukseklik'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('focus', function () { snapshotAl(); });
+                el.addEventListener('change', fiyatEfektGuncelle);
+            });
+
+            // Mevcut layout yükle
+            if (mevcutJson) {
+                document.getElementById('kanvasGenislik').value  = mevcutJson.genislik || 300;
+                document.getElementById('kanvasYukseklik').value = mevcutJson.yukseklik || 400;
+                document.getElementById('kanvasArkaplan').value  = mevcutJson.arkaplan || '#ffffff';
+                kanvasGuncelle();
+                (mevcutJson.alanlar  || []).forEach(function (a) { alanEkleJson(a,  false); });
+                (mevcutJson.cizgiler || []).forEach(function (c) { cizgiEkleJson(c, false); });
+            }
+        });
+
+        // ─── KLAVYE ──────────────────────────────────────────────────────────────────
+        document.addEventListener('keydown', function (e) {
+            var tag = document.activeElement.tagName;
+            var inputOdakta = (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA');
+
+            // Delete
+            if (e.key === 'Delete' && !inputOdakta) {
+                seciliSil();
+                return;
+            }
+
+            // Ok tuşları
+            if (seciliEl && !inputOdakta && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+                e.preventDefault();
+                // İlk basışta snapshot al
+                if (!window._okBasildi) {
+                    snapshotAl();
+                    window._okBasildi = true;
+                }
+                var adim = e.shiftKey ? 10 : 1;
+                var kanvas = document.getElementById('kanvas');
+                var x = parseInt(seciliEl.style.left) || 0;
+                var y = parseInt(seciliEl.style.top)  || 0;
+                var maxX = kanvas.offsetWidth  - seciliEl.offsetWidth;
+                var maxY = kanvas.offsetHeight - seciliEl.offsetHeight;
+                if (e.key === 'ArrowLeft')  x = Math.max(0, x - adim);
+                if (e.key === 'ArrowRight') x = Math.min(maxX, x + adim);
+                if (e.key === 'ArrowUp')    y = Math.max(0, y - adim);
+                if (e.key === 'ArrowDown')  y = Math.min(maxY, y + adim);
+                seciliEl.style.left = x + 'px';
+                seciliEl.style.top  = y + 'px';
+                return;
+            }
+
+            // Ctrl+Z
+            if (e.ctrlKey && e.key === 'z' && !inputOdakta) {
+                e.preventDefault();
+                geriAl();
+                return;
+            }
+
+            // Ctrl+D
+            if (e.ctrlKey && e.key === 'd' && !inputOdakta) {
+                e.preventDefault();
+                cogalt();
+                return;
+            }
+        });
+
+        document.addEventListener('keyup', function (e) {
+            if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+                window._okBasildi = false;
+            }
+        });
+
+        // ─── MOUSE TAŞIMA ────────────────────────────────────────────────────────────
+               document.addEventListener('mousemove', function (e) {
+
+            // RESIZE
+            if (isResizing && seciliEl) {
+                var dx = e.clientX - resizeStartX;
+                var dy = e.clientY - resizeStartY;
+                var kanvas = document.getElementById('kanvas');
+
+                var minW = 20, minH = 16;
+                var newL = resizeStartL, newT = resizeStartT;
+                var newW = resizeStartW, newH = resizeStartH;
+
+                // Yatay
+                if (resizeDir.includes('e')) {
+                    newW = Math.max(minW, snap(resizeStartW + dx));
+                }
+                if (resizeDir.includes('w')) {
+                    var dw = snap(resizeStartW - dx);
+                    if (dw >= minW) { newW = dw; newL = snap(resizeStartL + dx); }
+                }
+                // Dikey
+                if (resizeDir.includes('s')) {
+                    newH = Math.max(minH, snap(resizeStartH + dy));
+                }
+                if (resizeDir.includes('n')) {
+                    var dh = snap(resizeStartH - dy);
+                    if (dh >= minH) { newH = dh; newT = snap(resizeStartT + dy); }
+                }
+
+                // Kanvas sınırları
+                newL = Math.max(0, newL);
+                newT = Math.max(0, newT);
+                newW = Math.min(newW, kanvas.offsetWidth  - newL);
+                newH = Math.min(newH, kanvas.offsetHeight - newT);
+
+                seciliEl.style.left   = newL + 'px';
+                seciliEl.style.top    = newT + 'px';
+                seciliEl.style.width  = newW + 'px';
+                seciliEl.style.height = newH + 'px';
+
+                // Çizgiyse içini güncelle
+                if (seciliEl.dataset.tip === 'cizgi') {
+                    cizgiIcGuncelle(seciliEl,
+                        seciliEl.dataset.renk,
+                        seciliEl.dataset.kalinlik,
+                        seciliEl.dataset.yon,
+                        newW, newH);
+                }
+
+                // Panel inputlarını güncelle
+                document.getElementById('propWidth').value  = newW;
+                document.getElementById('propHeight').value = newH;
+                return;
+            }
+
+            // TAŞIMA
+            if (!isDragging || !seciliEl) return;
+            if (!window._tasimaBasladi) {
+                snapshotAl();
+                window._tasimaBasladi = true;
+            }
+            var kanvas = document.getElementById('kanvas');
+            var kr = kanvas.getBoundingClientRect();
+            var x = snap(Math.max(0, Math.min(e.clientX - kr.left - dragOffsetX, kanvas.offsetWidth  - seciliEl.offsetWidth)));
+            var y = snap(Math.max(0, Math.min(e.clientY - kr.top  - dragOffsetY, kanvas.offsetHeight - seciliEl.offsetHeight)));
+            seciliEl.style.left = x + 'px';
+            seciliEl.style.top  = y + 'px';
+        });
+
+                document.addEventListener('mouseup', function () {
+            isDragging = false;
+            if (isResizing) {
+                isResizing = false;
+                // Panel değerlerini güncelle
+                if (seciliEl) {
+                    document.getElementById('propWidth').value  = seciliEl.offsetWidth;
+                    document.getElementById('propHeight').value = seciliEl.offsetHeight;
+                }
+            }
+        });
+
+        // ─── KANVAS ──────────────────────────────────────────────────────────────────
+                function kanvasGuncelle() {
+            var k = document.getElementById('kanvas');
+            k.style.width      = document.getElementById('kanvasGenislik').value + 'px';
+            k.style.height     = document.getElementById('kanvasYukseklik').value + 'px';
+            k.style.background = document.getElementById('kanvasArkaplan').value;
+            k.style.fontFamily = document.getElementById('kanvasFontAilesi').value;
+        }
+
+        document.getElementById('kanvas').addEventListener('mousedown', function (e) {
+            if (e.target === this) {
+                if (seciliEl) { seciliEl.style.border = '1px dashed #94a3b8';handleKaldir(seciliEl); seciliEl = null; }
+                document.getElementById('seciliAlanPanel').style.display = 'none';
+            }
+        });
+
+        // ─── ELEMENT EKLEME ──────────────────────────────────────────────────────────
+        function alanEkle(ad) {
+            var kanvas = document.getElementById('kanvas');
+            snapshotAl(); // ÖNCE snapshot
+            alanEkleJson({
+                ad: ad,
+                x: 20, y: 20 + kanvas.querySelectorAll('[data-tip="alan"]').length * 42,
+                width: kanvas.offsetWidth - 40,
+                height: ad === 'IsLocalProduction' ? 50 : 36,
+                fontSize: 16, fontWeight: '400',
+                color: '#111111', textAlign: 'center',
+                efektler: {}
+            }, false); // false = snapshot zaten alındı
+        }
+
+        function alanEkleJson(cfg, alSnap) {
+            // alSnap=true ise bu fonksiyon kendi snapshot'ını alır (geriAl'dan çağrılınca false)
+            if (alSnap !== false) snapshotAl();
+            var kanvas = document.getElementById('kanvas');
+            var div = document.createElement('div');
+            div.dataset.ad      = cfg.ad;
+            div.dataset.etiket  = cfg.etiket || '';
+            div.dataset.tip     = 'alan';
+            div.dataset.efektler = JSON.stringify(cfg.efektler || {});
+
+                    div.dataset.fontAilesi = cfg.fontAilesi || '';
+        div.style.cssText = `
+            position:absolute; left:${cfg.x}px; top:${cfg.y}px;
+            width:${cfg.width}px; height:${cfg.height}px;
+            font-size:${cfg.fontSize}px; font-weight:${cfg.fontWeight};
+            color:${cfg.color}; text-align:${cfg.textAlign};
+            display:flex; align-items:center;
+            justify-content:${cfg.textAlign==='center'?'center':(cfg.textAlign==='right'?'flex-end':'flex-start')};
+            border:1px dashed #94a3b8; cursor:move; user-select:none;
+            box-sizing:border-box; padding:2px 4px; border-radius:4px;
+            font-family:${cfg.fontAilesi || 'inherit'};
+            overflow:hidden;`;
+
+            if (cfg.ad === 'IsLocalProduction') {
+                div.innerHTML = '<img src="/img/yerliuretimkirmizi.svg" style="width:100%;height:100%;object-fit:contain;pointer-events:none;" />';
+            } else if (fiyatAlanlari.includes(cfg.ad)) {
+                var span = document.createElement('span');
+                span.className = 'efekt-text';
+                span.style.display = 'inline-block';
+                span.textContent = alanEtiketleri[cfg.ad] || cfg.ad;
+                div.appendChild(span);
+                if (cfg.efektler && Object.keys(cfg.efektler).length > 0) {
+                    setTimeout(function () { uygulaFiyatEfekt(div, cfg.efektler); }, 50);
+                }
+            } else {
+                div.textContent = alanEtiketleri[cfg.ad] || cfg.ad;
+            }
+
+            baglaMousedown(div);
+            kanvas.appendChild(div);
+            secil(div);
+        }
+
+        function cizgiEkle() {
+            var kanvas = document.getElementById('kanvas');
+            snapshotAl(); // ÖNCE snapshot
+            cizgiEkleJson({
+                x: 20, y: 50,
+                width: kanvas.offsetWidth - 40, height: 20,
+                renk: '#111111', kalinlik: 2, yon: 'yatay'
+            }, false);
+        }
+
+        function cizgiEkleJson(cfg, alSnap) {
+            if (alSnap !== false) snapshotAl();
+            var kanvas = document.getElementById('kanvas');
+            var div = document.createElement('div');
+            div.dataset.tip      = 'cizgi';
+            div.dataset.renk     = cfg.renk;
+            div.dataset.kalinlik = cfg.kalinlik;
+            div.dataset.yon      = cfg.yon;
+
+            div.style.cssText = `
+                position:absolute; left:${cfg.x}px; top:${cfg.y}px;
+                width:${cfg.width}px; height:${cfg.height}px;
+                cursor:move; user-select:none;
+                border:1px dashed #94a3b8; border-radius:2px;
+                box-sizing:border-box;`;
+
+            cizgiIcGuncelle(div, cfg.renk, cfg.kalinlik, cfg.yon, cfg.width, cfg.height);
+            baglaMousedown(div);
+            kanvas.appendChild(div);
+            secil(div);
+        }
+
+        function baglaMousedown(el) {
+            el.addEventListener('mousedown', function (e) {
+                secil(el);
+                isDragging = true;
+                window._tasimaBasladi = false;
+                var kr = document.getElementById('kanvas').getBoundingClientRect();
+                dragOffsetX = e.clientX - kr.left - parseInt(el.style.left);
+                dragOffsetY = e.clientY - kr.top  - parseInt(el.style.top);
+                e.preventDefault();
+            });
+        }
+                // ─── RESIZE HANDLE'LARI ───────────────────────────────────────────────────────
+        var DIRS = ['n','ne','e','se','s','sw','w','nw'];
+
+        var CURSOR_MAP = {
+            n:'n-resize', ne:'ne-resize', e:'e-resize', se:'se-resize',
+            s:'s-resize', sw:'sw-resize', w:'w-resize', nw:'nw-resize'
+        };
+
+        function handleEkle(el) {
+            handleKaldir(el); // önce varsa temizle
+            DIRS.forEach(function(dir) {
+                var h = document.createElement('div');
+                h.className        = 'resize-handle';
+                h.dataset.dir      = dir;
+                h.style.cssText    = handleStyle(dir);
+                h.addEventListener('mousedown', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    snapshotAl();
+                    isResizing    = true;
+                    resizeDir     = dir;
+                    resizeStartX  = e.clientX;
+                    resizeStartY  = e.clientY;
+                    resizeStartL  = parseInt(el.style.left)   || 0;
+                    resizeStartT  = parseInt(el.style.top)    || 0;
+                    resizeStartW  = el.offsetWidth;
+                    resizeStartH  = el.offsetHeight;
+                });
+                el.appendChild(h);
+            });
+        }
+
+        function handleKaldir(el) {
+            el.querySelectorAll('.resize-handle').forEach(function(h) { h.remove(); });
+        }
+
+        function handleStyle(dir) {
+            var s = HANDLE_SIZE;
+            var half = s / 2;
+            var base = `position:absolute; width:${s}px; height:${s}px;
+                        background:#3b82f6; border:1px solid #fff;
+                        border-radius:1px; z-index:10; cursor:${CURSOR_MAP[dir]};`;
+            var pos = {
+                n:  `top:${-half}px; left:calc(50% - ${half}px);`,
+                s:  `bottom:${-half}px; left:calc(50% - ${half}px);`,
+                e:  `right:${-half}px; top:calc(50% - ${half}px);`,
+                w:  `left:${-half}px; top:calc(50% - ${half}px);`,
+                ne: `top:${-half}px; right:${-half}px;`,
+                nw: `top:${-half}px; left:${-half}px;`,
+                se: `bottom:${-half}px; right:${-half}px;`,
+                sw: `bottom:${-half}px; left:${-half}px;`
+            };
+            return base + pos[dir];
+        }
+
+        function cizgiIcGuncelle(div, renk, kalinlik, yon, w, h) {
+            w = w || div.offsetWidth  || parseInt(div.style.width)  || 100;
+            h = h || div.offsetHeight || parseInt(div.style.height) || 20;
+            var lines = '';
+            if      (yon === 'yatay')    lines = `<line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+            else if (yon === 'dikey')    lines = `<line x1="${w/2}" y1="0" x2="${w/2}" y2="${h}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+            else if (yon === 'carpraz1') lines = `<line x1="0" y1="0" x2="${w}" y2="${h}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+            else if (yon === 'carpraz2') lines = `<line x1="${w}" y1="0" x2="0" y2="${h}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+            div.innerHTML = `<svg width="${w}" height="${h}" style="display:block;">${lines}</svg>`;
+        }
+
+        // ─── SEÇİM ───────────────────────────────────────────────────────────────────
+        function secil(el) {
+                if (seciliEl) {
+            seciliEl.style.border = '1px dashed #94a3b8';
+            handleKaldir(seciliEl);   // ← eklendi
+        }
+        seciliEl = el;
+        el.style.border = '2px solid #3b82f6';
+        handleEkle(el);               // ← eklendi
+            if (seciliEl) seciliEl.style.border = '1px dashed #94a3b8';
+            seciliEl = el;
+            el.style.border = '2px solid #3b82f6';
+            document.getElementById('seciliAlanPanel').style.display = 'block';
+
+            if (el.dataset.tip === 'cizgi') {
+                document.getElementById('normalAlanProps').style.display  = 'none';
+                document.getElementById('cizgiProps').style.display       = 'block';
+                document.getElementById('fiyatCizgiPanel').style.display  = 'none';
+                document.getElementById('propCizgiRenk').value     = el.dataset.renk     || '#111111';
+                document.getElementById('propCizgiKalinlik').value = el.dataset.kalinlik || 2;
+                document.getElementById('propCizgiYon').value      = el.dataset.yon      || 'yatay';
+                document.getElementById('propCizgiUzunluk').value  = el.offsetWidth;
+            } else {
+                document.getElementById('normalAlanProps').style.display = 'block';
+                document.getElementById('cizgiProps').style.display      = 'none';
+                document.getElementById('propFontSize').value   = parseInt(el.style.fontSize)  || 16;
+                document.getElementById('propFontWeight').value = el.style.fontWeight           || '400';
+                document.getElementById('propColor').value      = rgbToHex(el.style.color);
+                document.getElementById('propAlign').value      = el.style.textAlign            || 'left';
+                document.getElementById('propFontAilesi').value = el.dataset.fontAilesi || '';
+                var ad = el.dataset.ad || '';
+                if (fiyatAlanlari.includes(ad)) {
+                    document.getElementById('fiyatCizgiPanel').style.display = 'block';
+                    var ef = JSON.parse(el.dataset.efektler || '{}');
+                    document.getElementById('efektUst').checked      = !!ef.ust;
+                    document.getElementById('efektAlt').checked      = !!ef.alt;
+                    document.getElementById('efektSol').checked      = !!ef.sol;
+                    document.getElementById('efektSag').checked      = !!ef.sag;
+                    document.getElementById('efektCarpraz1').checked = !!ef.carpraz1;
+                    document.getElementById('efektCarpraz2').checked = !!ef.carpraz2;
+                    document.getElementById('efektRenk').value       = ef.renk     || '#e63946';
+                    document.getElementById('efektUzunluk').value    = ef.uzunluk  || 0;
+                    document.getElementById('efektYukseklik').value  = ef.yukseklik || 0;
+                } else {
+                    document.getElementById('fiyatCizgiPanel').style.display = 'none';
+                }
+            }
+            document.getElementById('propEtiket').value = el.dataset.etiket || '';
+            document.getElementById('propWidth').value  = el.offsetWidth;
+            document.getElementById('propHeight').value = el.offsetHeight;
+        }
+
+        // ─── PROP GÜNCELLE ───────────────────────────────────────────────────────────
+        // Snapshot focus'ta alınıyor (yukarıda), burada sadece uygula
+        function propGuncelle() {
+            if (!seciliEl) return;
+            var w = parseInt(document.getElementById('propWidth').value)  || seciliEl.offsetWidth;
+            var h = parseInt(document.getElementById('propHeight').value) || seciliEl.offsetHeight;
+            seciliEl.style.width  = w + 'px';
+            seciliEl.style.height = h + 'px';
+
+            if (seciliEl.dataset.tip === 'cizgi') {
+                var renk     = document.getElementById('propCizgiRenk').value;
+                var kalinlik = document.getElementById('propCizgiKalinlik').value;
+                var yon      = document.getElementById('propCizgiYon').value;
+                var uzunluk  = parseInt(document.getElementById('propCizgiUzunluk').value) || w;
+                seciliEl.dataset.renk     = renk;
+                seciliEl.dataset.kalinlik = kalinlik;
+                seciliEl.dataset.yon      = yon;
+                seciliEl.style.width  = uzunluk + 'px';
+                seciliEl.style.height = h + 'px';
+                cizgiIcGuncelle(seciliEl, renk, kalinlik, yon, uzunluk, h);
+            } else {
+                        var align = document.getElementById('propAlign').value;
+        var fontAilesi = document.getElementById('propFontAilesi').value;
+        seciliEl.style.fontSize       = document.getElementById('propFontSize').value + 'px';
+        seciliEl.style.fontWeight     = document.getElementById('propFontWeight').value;
+        seciliEl.style.color          = document.getElementById('propColor').value;
+        seciliEl.dataset.etiket       = document.getElementById('propEtiket').value;
+        seciliEl.style.textAlign      = align;
+        seciliEl.style.justifyContent = align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start');
+        seciliEl.style.fontFamily     = fontAilesi || '';
+        seciliEl.dataset.fontAilesi   = fontAilesi;
+                uygulaFiyatEfekt(seciliEl, JSON.parse(seciliEl.dataset.efektler || '{}'));
+            }
+        }
+
+        function fiyatEfektGuncelle() {
+            if (!seciliEl) return;
+            var ef = {
+                ust:       document.getElementById('efektUst').checked,
+                alt:       document.getElementById('efektAlt').checked,
+                sol:       document.getElementById('efektSol').checked,
+                sag:       document.getElementById('efektSag').checked,
+                carpraz1:  document.getElementById('efektCarpraz1').checked,
+                carpraz2:  document.getElementById('efektCarpraz2').checked,
+                renk:      document.getElementById('efektRenk').value,
+                kalinlik:  parseInt(document.getElementById('efektKalinlik').value)  || 2,
+                uzunluk:   parseInt(document.getElementById('efektUzunluk').value)   || 0,
+                yukseklik: parseInt(document.getElementById('efektYukseklik').value) || 0
+            };
+            seciliEl.dataset.efektler = JSON.stringify(ef);
+            uygulaFiyatEfekt(seciliEl, ef);
+        }
+
+        function uygulaFiyatEfekt(div, ef) {
+            var eski = div.querySelector('.efekt-overlay');
+            if (eski) eski.remove();
+            var span = div.querySelector('span.efekt-text');
+            if (!span) return;
+
+            span.style.textDecoration          = '';
+            span.style.textDecorationColor     = '';
+            span.style.textDecorationThickness = '';
+            span.style.borderLeft              = '';
+            span.style.borderRight             = '';
+            span.style.paddingLeft             = '';
+            span.style.paddingRight            = '';
+
+            if (!ef || !Object.values(ef).some(function (v) { return v === true; })) return;
+
+            var renk     = ef.renk     || '#e63946';
+            var kalinlik = ef.kalinlik || 2;
+            var dek = [];
+            if (ef.ust) dek.push('overline');
+            if (ef.alt) dek.push('underline');
+            if (dek.length > 0) {
+                span.style.textDecoration          = dek.join(' ');
+                span.style.textDecorationColor     = renk;
+                span.style.textDecorationThickness = kalinlik + 'px';
+            }
+            if (ef.sol) { span.style.borderLeft  = kalinlik + 'px solid ' + renk; span.style.paddingLeft  = '3px'; }
+            if (ef.sag) { span.style.borderRight = kalinlik + 'px solid ' + renk; span.style.paddingRight = '3px'; }
+
+            if (ef.carpraz1 || ef.carpraz2) {
+                span.style.position = 'relative';
+                span.style.display  = 'inline-block';
+                var spanW = span.offsetWidth  || 60;
+                var spanH = span.offsetHeight || 30;
+                var w = (ef.uzunluk   && ef.uzunluk   > 0) ? ef.uzunluk   : spanW;
+                var h = (ef.yukseklik && ef.yukseklik > 0) ? ef.yukseklik : spanH;
+                var ox = (spanW - w) / 2, oy = (spanH - h) / 2;
+                var lines = '';
+                if (ef.carpraz1) lines += `<line x1="${ox}" y1="${oy}" x2="${ox+w}" y2="${oy+h}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+                if (ef.carpraz2) lines += `<line x1="${ox+w}" y1="${oy}" x2="${ox}" y2="${oy+h}" stroke="${renk}" stroke-width="${kalinlik}"/>`;
+                var overlay = document.createElement('div');
+                overlay.className   = 'efekt-overlay';
+                overlay.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+                overlay.innerHTML   = `<svg style="position:absolute;top:0;left:0;" width="${spanW}" height="${spanH}">${lines}</svg>`;
+                span.appendChild(overlay);
+            }
+        }
+
+        // ─── SİL / ÇOĞALT ────────────────────────────────────────────────────────────
+        function seciliSil() {
+            if (!seciliEl) return;
+            snapshotAl(); // ÖNCE snapshot
+            seciliEl.remove();
+            seciliEl = null;
+            document.getElementById('seciliAlanPanel').style.display = 'none';
+        }
+
+        function cogalt() {
+            if (!seciliEl) return;
+            snapshotAl(); // ÖNCE snapshot
+            if (seciliEl.dataset.tip === 'cizgi') {
+                cizgiEkleJson({
+                    x: parseInt(seciliEl.style.left) + 12, y: parseInt(seciliEl.style.top) + 12,
+                    width: seciliEl.offsetWidth, height: seciliEl.offsetHeight,
+                    renk: seciliEl.dataset.renk, kalinlik: parseInt(seciliEl.dataset.kalinlik), yon: seciliEl.dataset.yon
+                }, false);
+            } else {
+                alanEkleJson({
+                    ad: seciliEl.dataset.ad, etiket: seciliEl.dataset.etiket || '',
+                    x: parseInt(seciliEl.style.left) + 12, y: parseInt(seciliEl.style.top) + 12,
+                    width: seciliEl.offsetWidth, height: seciliEl.offsetHeight,
+                    fontSize: parseInt(seciliEl.style.fontSize), fontWeight: seciliEl.style.fontWeight,
+                    color: seciliEl.style.color, textAlign: seciliEl.style.textAlign,
+                    efektler: JSON.parse(seciliEl.dataset.efektler || '{}')
+                }, false);
+            }
+        }
+
+        // ─── KAYDET ──────────────────────────────────────────────────────────────────
+        function kaydet() {
+            var kanvas = document.getElementById('kanvas');
+            var alanlarJson  = [];
+            var cizgilerJson = [];
+
+            kanvas.querySelectorAll('[data-tip="alan"]').forEach(function (el) {
+                        alanlarJson.push({
+            ad:         el.dataset.ad,
+            etiket:     el.dataset.etiket  || '',
+            x:          parseInt(el.style.left),
+            y:          parseInt(el.style.top),
+            width:      el.offsetWidth,
+            height:     el.offsetHeight,
+            fontSize:   parseInt(el.style.fontSize),
+            fontWeight: el.style.fontWeight,
+            color:      el.style.color,
+            textAlign:  el.style.textAlign,
+            fontAilesi: el.dataset.fontAilesi || '',
+            efektler:   JSON.parse(el.dataset.efektler || '{}')
+        });
+            });
+
+            kanvas.querySelectorAll('[data-tip="cizgi"]').forEach(function (el) {
+                cizgilerJson.push({
+                    x:        parseInt(el.style.left),
+                    y:        parseInt(el.style.top),
+                    width:    el.offsetWidth,
+                    height:   el.offsetHeight,
+                    renk:     el.dataset.renk,
+                    kalinlik: parseInt(el.dataset.kalinlik),
+                    yon:      el.dataset.yon
+                });
+            });
+
+            var json = JSON.stringify({
+                genislik:  kanvas.offsetWidth,
+                yukseklik: kanvas.offsetHeight,
+                arkaplan:  document.getElementById('kanvasArkaplan').value,
+                alanlar:   alanlarJson,
+                cizgiler:  cizgilerJson
+            });
+
+            fetch('/Layout/SaveLayout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ layoutId: layoutId, layoutJson: json })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.ok) {
+                    var btn = document.querySelector('button[onclick="kaydet()"]');
+                    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Kaydedildi!';
+                    btn.classList.replace('btn-success', 'btn-outline-success');
+                    setTimeout(function () {
+                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Kaydet';
+                        btn.classList.replace('btn-outline-success', 'btn-success');
+                    }, 2000);
+                }
+            });
+        }
+
+        // ─── YARDIMCI ────────────────────────────────────────────────────────────────
+        function rgbToHex(rgb) {
+            if (!rgb || rgb.startsWith('#')) return rgb || '#111111';
+            var nums = rgb.match(/\d+/g);
+            if (!nums) return '#111111';
+            return '#' + nums.slice(0, 3).map(function (n) {
+                return parseInt(n).toString(16).padStart(2, '0');
+            }).join('');
+        }
+    </script>
+}

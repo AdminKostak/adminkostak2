@@ -1,0 +1,99 @@
+﻿@model List<LCM.Domain.Entities.LabelType>
+@{
+    ViewData["Title"] = "Etiket Tipleri";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Etiket Tipleri</h5>
+        <small class="text-muted">Sistemdeki tüm etiket tipleri</small>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <a href="/LabelType/Create" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i>Yeni Ekle
+        </a>
+    }
+</div>
+
+@if (TempData["Basari"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Basari"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>@TempData["Hata"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm" style="border-radius:14px;">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0" style="border-radius:14px; overflow:hidden;">
+            <thead style="background:#f8fafc;">
+                <tr>
+                    <th class="px-4 py-3 text-muted fw-500" style="font-size:0.82rem;">#</th>
+                    <th class="px-4 py-3 text-muted fw-500" style="font-size:0.82rem;">ETİKET TİPİ</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th class="px-4 py-3 text-muted fw-500 text-end" style="font-size:0.82rem;">İŞLEMLER</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="px-4 py-3 text-muted" style="font-size:0.85rem;">@item.Id</td>
+                        <td class="px-4 py-3">
+                            <span class="badge rounded-pill px-3 py-2"
+                                  style="background:#eff6ff; color:#2563eb; font-size:0.88rem;">
+                                <i class="bi bi-tag me-1"></i>@item.EtiketTipi
+                            </span>
+                        </td>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <td class="px-4 py-3 text-end">
+                                <a href="/LabelType/Edit/@item.Id"
+                                   class="btn btn-sm btn-outline-primary me-1"
+                                   style="border-radius:8px;">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="/LabelType/Delete/@item.Id"
+                                      style="display:inline;"
+                                      data-noloading="true">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button"
+                                            onclick="openConfirm(this.closest('form'))"
+                                            class="btn btn-sm btn-outline-danger"
+                                            style="border-radius:8px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                            Henüz etiket tipi eklenmemiş.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts {
+    <script>
+       
+    </script>
+}

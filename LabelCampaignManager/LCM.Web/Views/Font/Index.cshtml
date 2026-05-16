@@ -1,0 +1,162 @@
+﻿@model List<LCM.Domain.Entities.Font>
+@{
+    ViewData["Title"] = "Font Yönetimi";
+}
+
+<div class="container-fluid py-4">
+    <div class="row g-4">
+
+        <!-- SOL: Font Yükle -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-upload me-2"></i>Font Yükle</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Font Adı</label>
+                        <input type="text" id="fontAdi" class="form-control" placeholder="örn: Montserrat" style="border-radius:8px;" />
+                        <small class="text-muted">Aynı aile için aynı adı kullan (örn: hep "Poppins")</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Font Weight</label>
+                        <select id="fontWeight" class="form-select" style="border-radius:8px;">
+                            <option value="100">100 — Thin</option>
+                            <option value="200">200 — ExtraLight</option>
+                            <option value="300">300 — Light</option>
+                            <option value="400" selected>400 — Regular</option>
+                            <option value="500">500 — Medium</option>
+                            <option value="600">600 — SemiBold</option>
+                            <option value="700">700 — Bold</option>
+                            <option value="800">800 — ExtraBold</option>
+                            <option value="900">900 — Black</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="italic">
+                            <label class="form-check-label" for="italic">Italic</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Dosya</label>
+                        <input type="file" id="fontDosya" class="form-control" accept=".ttf,.otf,.woff,.woff2" style="border-radius:8px;" />
+                        <small class="text-muted">TTF, OTF, WOFF, WOFF2 desteklenir</small>
+                    </div>
+
+                    <button class="btn btn-primary w-100" style="border-radius:8px;" onclick="fontYukle()">
+                        <i class="bi bi-upload me-2"></i>Yükle
+                    </button>
+
+                    <div id="yuklemesaj" class="mt-3" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ: Yüklü Fontlar -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-fonts me-2"></i>Yüklü Fontlar</h5>
+
+                    <div id="fontTabloDiv">
+                        @if (!Model.Any())
+                        {
+                            <p class="text-muted">Henüz font eklenmemiş.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Font Adı</th>
+                                        <th>Dosya</th>
+                                        <th>Weight</th>
+                                        <th>Style</th>
+                                        <th>Önizleme</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var f in Model)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@f.FontAdi</td>
+                                            <td><small class="text-muted">@f.DosyaAdi</small></td>
+                                            <td><span class="badge bg-light text-dark border">@f.FontWeight</span></td>
+                                            <td><span class="badge bg-light text-dark border">@(f.Italic ? "italic" : "normal")</span></td>
+                                            <td>
+                                                <span style="font-family:'@f.FontAdi'; font-weight:@f.FontWeight; font-style:@(f.Italic ? "italic" : "normal"); font-size:1.1rem;">
+                                                    Merhaba Dünya
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger" style="border-radius:8px;"
+                                                        onclick="fontSil(@f.Id, '@f.FontAdi')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function fontYukle() {
+            var dosya      = document.getElementById('fontDosya').files[0];
+            var fontAdi    = document.getElementById('fontAdi').value.trim();
+            var fontWeight = document.getElementById('fontWeight').value;
+            var italic     = document.getElementById('italic').checked;
+            var mesajDiv   = document.getElementById('yuklemesaj');
+
+            if (!dosya || !fontAdi) {
+                mesajDiv.style.display = 'block';
+                mesajDiv.innerHTML = '<div class="alert alert-warning">Font adı ve dosya zorunludur.</div>';
+                return;
+            }
+
+            var form = new FormData();
+            form.append('dosya',      dosya);
+            form.append('fontAdi',    fontAdi);
+            form.append('fontWeight', fontWeight);
+            form.append('italic',     italic);
+
+            fetch('/Font/Yukle', { method: 'POST', body: form })
+            .then(r => r.json())
+            .then(d => {
+                mesajDiv.style.display = 'block';
+                if (d.ok) {
+                    mesajDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle me-1"></i>Font yüklendi! Sayfa yenileniyor...</div>';
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    mesajDiv.innerHTML = `<div class="alert alert-danger">${d.mesaj}</div>`;
+                }
+            });
+        }
+
+        function fontSil(id, ad) {
+            if (!confirm(`"${ad}" fontunu silmek istediğinize emin misiniz?\nDosya da silinecek.`)) return;
+
+            fetch('/Font/Sil', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.ok) location.reload();
+            });
+        }
+    </script>
+}
