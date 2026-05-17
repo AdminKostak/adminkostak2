@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="LCM.Application/LCM.Application.csproj" />
-  <Project Path="LCM.Domain/LCM.Domain.csproj" />
-  <Project Path="LCM.Infrastructure/LCM.Infrastructure.csproj" />
-  <Project Path="LCM.Web/LCM.Web.csproj" Id="2720c020-36a1-4fe4-aa4d-2089e71eacfa" />
-</Solution>
